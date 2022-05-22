@@ -1,0 +1,49 @@
+.table-container {
+  overflow: auto;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  font-size: $table-font-size;
+  margin: 0 0 20px;
+  width: 100%;
+}
+
+tbody tr {
+  &:nth-of-type(odd) {
+    background: var(--table-row-odd-bg-color);
+  }
+
+  &:hover {
+    background: var(--table-row-hover-bg-color);
+  }
+}
+
+caption, th, td {
+  padding: 8px;
+}
+
+th, td {
+  border: 1px solid $table-border-color;
+  border-bottom: 3px solid $table-cell-border-bottom-color;
+}
+
+th {
+  font-weight: 700;
+  padding-bottom: 10px;
+}
+
+td {
+  border-bottom-width: 1px;
+}
+
+/*自定义的表格样式，修改表头颜色、表格边框颜色、字体颜色*/
+table, th, td{
+  border: 1px solid #1e1b26;
+}
+
+th{
+  background: #1e1b26;
+  color: #d18d41;
+}

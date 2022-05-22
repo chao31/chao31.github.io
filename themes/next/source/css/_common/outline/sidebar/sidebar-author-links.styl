@@ -1,0 +1,13 @@
+.links-of-author {
+  a {
+    // 我的修改 ---- 左边个人信息区域字体大小
+    font-size: $font-size-medium;
+    // font-size: $font-size-smaller;
+  }
+
+  if (not hexo-config('social_icons.icons_only')) {
+    .fa, .fab, .far, .fas {
+      margin-right: 2px;
+    }
+  }
+}
