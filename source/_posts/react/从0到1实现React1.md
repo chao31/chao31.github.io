@@ -1,11 +1,13 @@
 ---
-title: 从 0 到 1 系列——实现 React
+title: 从 0 到 1 实现 React（一）—— 生成虚拟 dom
 date: 2021-08-15 08:00:59
 tags: 
   - react
   - 从 0 到 1 系列
 categories: react
 ---
+[lesson-01 源码](https://github.com/chao31/react-mini/tree/lesson01)
+
 ## 创建一个空项目
 
 创建项目并初始化`package.json`
@@ -15,15 +17,15 @@ mkdir react-mini
 npm init -y 
 ```
 
-### 使用 parcel-bundler 打包构建
+### 配置 parcel
 
-为了读者实操时不因构建工具的版本、配置等问题报错，本文会安装固定版本的 npm 包：
+因为 parcel 是零配置，所以只需安装上即可，为了大家不会因版本问题导致报错，下面安装命令带上了版本：
 
 ```bash
 npm i -D parcel-bundler@1.12.3
 ```
 
-### 新增一个 index.html
+### 新增 index.html 模板
 
 添加 html 代码：
 
@@ -46,7 +48,7 @@ npm i -D parcel-bundler@1.12.3
 </html>
 ```
 
-### 添加 index.js
+### 添加入口 index.js
 
 `index.js`里面是一段 JSX 代码
 
@@ -70,7 +72,7 @@ console.log('成功启动');
 
 ### 什么是 jsx？
 
-如下代码就是一段 [JSX](https://zh-hans.reactjs.org/docs/introducing-jsx.html)
+如下就是一段 JSX 代码 [具体请参考](https://zh-hans.reactjs.org/docs/introducing-jsx.html)
 
 ```js
 const profile = (
@@ -81,7 +83,7 @@ const profile = (
 );
 ```
 
-接下来要将上面 JSX 代码转化为`虚拟 dom 节点`（本文下面将用`vnode`指代`虚拟 dom 节点`），下面代码是将要转换成的`vnode`结构：
+接下来要将上面 JSX 代码转化为`虚拟 dom 节点`（后文中将用`vnode`指代`虚拟 dom 节点`），下面代码是将要转换成的`vnode`结构：
 
 <details>
 ```json
@@ -90,13 +92,13 @@ const profile = (
   "attrs": {
     "className": "profile"
   },
-  "childrens": [
+  "children": [
     {
       "tag": "span",
       "attrs": {
         "className": "profile-title"
       },
-      "childrens": [
+      "children": [
         "title"
       ]
     },
@@ -105,7 +107,7 @@ const profile = (
       "attrs": {
         "className": "profile-content"
       },
-      "childrens": [
+      "children": [
         "content"
       ]
     }
@@ -135,8 +137,9 @@ npm i babel-core babel-preset-env babel-plugin-transform-react-jsx -D
 }
 ```
 
-### 将 index.js 改为一段 JSX
+### 用 JSX 测试
 
+将 index.js 改为一段 JSX
 ```js
 - console.log('成功启动');
 
@@ -159,7 +162,7 @@ react-mini.e31bb0bc.js:121 Uncaught ReferenceError: React is not defined
     at react-mini.e31bb0bc.js:120:3
 ```
 
-点击进入第一行错误定位，会跳转到源码出错的地方：
+点击进入第一行错误定位，会跳转到源码出错的地方—— “React.createElement 未定义”，因为我们还未实现`React.createElement`,所以因找不到该函数而报错
 
 ```js
 var profile = React.createElement( // 从该行开始报错
@@ -186,8 +189,6 @@ console.log('profile: ', profile);
 // ...
 ```
 
-因为我们没有实现`React.createElement`,所以找不到该函数报错
-
 从上面代码可以看出，`babel-plugin-transform-react-jsx`做了两件事情：
 
 - 将 JSX 代码转换成了参数，`type, props, ...children`
@@ -199,35 +200,35 @@ React.createElement(
   [props],
   [...children]
 )
+
+// 参数说明：
+
+// - type：标签类型，如：`div`、`span`、`h3`, 
+//        也可以是 React 组件 类型（class 组件或函数组件）
+// - props: 该标签的属性，如`classname`, 若无则为 null
+// - children：第 2、3...个参数，都是子元素，子元素又开始递归调用`React.createElement`
 ```
 
-参数说明：
-
-- type：标签类型，如：'div'、'span'、'h3', 也可以是 React 组件 类型（class 组件或函数组件）
-- props: 该标签的属性，如'classname', 若无则为空
-- children：第 2、3...个参数，都是子元素，子元素又递归给了`React.createElement`
+所以要完成 JSX 的处理，我们需要实现一下 React.createElement，并通过其生成虚拟 dom 节点
 
 ## 生成虚拟 dom 节点
 
-通过实现 React.createElement，生成虚拟 dom 节点
-
 ### 实现 React.createElement
 
-`React.createElement` 返回一个含有 children 的树状结构，即为 虚拟 dom 节点
+使`React.createElement` 返回一个含有 children 的树状结构，就实现了`vnode`
 
 新增一个`react/index.js`文件：
 
 ```js
 const React = {
   createElement,
-  // Component,
 };
 
-function createElement(tag, attrs, ...childrens) {
+function createElement(tag, attrs, ...children) {
   return {
     tag,
     attrs,
-    childrens,
+    children,
   };
 }
 
@@ -249,3 +250,5 @@ console.log('profile: ', profile);
 ```
 
 至此，我们已经可以生成虚拟 dom 节点了
+
+[lesson-01 源码参考](https://github.com/chao31/react-mini/tree/lesson01)
