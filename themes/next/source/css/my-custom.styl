@@ -10,7 +10,7 @@
 
 .post-body {
   img {
-    margin-top: 1rem;
+    margin: 0;
     box-shadow: 0 1px 10px 0 rgba(0 0 0  0.4);
   }
 
@@ -29,7 +29,7 @@
 
   a {
     text-decoration: underline;
-    margin: 0 0.6rem;
+    // margin: 0 0.6rem;
 
     &:hover {
       border-bottom-color: #af3a03;
@@ -43,4 +43,11 @@ code, kbd, figure.highlight, pre {
   color: rgba(242, 229, 188, 60%);
 }
 
+// diff代码颜色，```diff - xxx + xxx```
+.hljs-deletion {
+    color: #f50532;
+}
+.hljs-addition {
+  color: #b4eb72;
+}
 

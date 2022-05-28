@@ -74,7 +74,7 @@ console.log('成功启动');
 
 如下就是一段 JSX 代码 [具体请参考](https://zh-hans.reactjs.org/docs/introducing-jsx.html)
 
-```js
+```jsx
 const profile = (
   <div className="profile">
     <span className="profile-title">title</span>
@@ -140,7 +140,7 @@ npm i babel-core babel-preset-env babel-plugin-transform-react-jsx -D
 ### 用 JSX 测试
 
 将 index.js 改为一段 JSX
-```js
+```diff
 - console.log('成功启动');
 
 + const profile = (

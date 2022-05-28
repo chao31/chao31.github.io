@@ -112,13 +112,13 @@ theme: next
 ## 输出目录
 public_dir: public
 
-## 首页设置，设置一个不存在的页面如aaa，就会去找source下的index.md
+## 首页设置，设置一个不存在的页面如 aaa，就会去找 source 下的 index.md
 index_generator:
   path: /default_index/
   per_page: 10
   order_by: -date
 
-## 设置archives为首页
+## 设置 archives 为首页
 archive_dir: /
 
 ## 搜索配置
@@ -134,7 +134,7 @@ marked:
   prependRoot: true
   postAsset: true
 
-## 将代码打到git上
+## 将代码打到 git 上
 deploy:
   type: git
   repo: https://github.com/chao31/chao31.github.io.git
