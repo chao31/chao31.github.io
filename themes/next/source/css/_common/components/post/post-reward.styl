@@ -2,6 +2,12 @@
   margin: $post-card-margin;
   padding: 1em 0;
   text-align: center;
+  
+  // 缩小赞赏话和第一个收款码图片
+  div:nth-child(1) {
+    font-size: 13px;
+    transform: scale(.8);
+  }
 
   button {
     button($sidebar-highlight);

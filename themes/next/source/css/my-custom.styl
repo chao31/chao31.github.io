@@ -51,3 +51,30 @@ code, kbd, figure.highlight, pre {
   color: #b4eb72;
 }
 
+// 修改 > 引用风格，改为逗号
+blockquote {
+  position: relative;
+  padding: 0 1rem 0 3.125rem;
+  border: none;
+  line-height: 29px;
+  font-family: "IBM Plex Sans",sans-serif;
+  font-style: italic;
+
+  &:before {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 5px;
+    left: 0;
+    width: 25px;
+    height: 16px;
+    background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADMAAAAgCAQAAAAV6oiUAAABYElEQVRIx7WVPU7DQBCFH5uENBFCFDQIAsEJiJYTcAO4QS7JDbgBRQDbkYgCNDSRDOInCVSwazTPnlmU2XL8+WnevLUBuSb4IicBq2vKnMpAB0sCvKNBRBp4ozIdJyJ9rJGXpViQThdt0pmikGWOqTF3tFPJyDJHFLmhnUpGlhlQ5JZ2VMw5Xd8lxc8oc/X3Ufe7dLtNBuZHpkeRlHYMTP00o4hpRkwmiZjGzKxjQZY5A6+CMJ9oycAJzUz5XATMjpIZetN60FWuCoDAuJpllmusCoDAuJplhvWEQhWAsF7x4GUOzbMYGYtpufLWCIwD0MKeCskipsm8zD6aZtO2sWE1rR8RZyPjDDcgi7g1gWkDFTDDs+onFtYc915mdXGeYO5lkoicGRmHJg5WfWsAh1322a4wbQubNsapo5lGxDn1MokSGZs3U5pGl5kPTM05izAtx9Js2iNerNP84ycAAN906c65Frn+7QAAAABJRU5ErkJggg==') 0 0 no-repeat;
+    background-size: 100% auto;
+    opacity: .15;
+  }
+}
+
+
+
+
+

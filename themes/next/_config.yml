@@ -164,13 +164,14 @@ site_state: true
 
 social_icons:
   enable: true
-  icons_only: false
+  icons_only: true
   transition: false
 
 # Blog rolls
 links_settings:
-  icon: fa fa-globe
-  title: Links
+  icon: fa-solid fa-earth-asia
+  # icon: fa fa-globe
+  title: 友链
   # Available values: block | inline
   layout: block
 
@@ -266,11 +267,11 @@ reward_settings:
   # If true, a donate button will be displayed in every article by default.
   enable: true
   animation: true
-  #comment: Buy me a coffee
+  comment: 有钱的捧个钱场，没钱的捧个人场喽😜
 
 reward:
-  #wechatpay: /images/wechatpay.png
-  #alipay: /images/alipay.png
+  wechatpay: /images/wechatpay.JPG
+  alipay: /images/alipay.JPG
   #paypal: /images/paypal.png
   #bitcoin: /images/bitcoin.png
 
@@ -894,8 +895,10 @@ menu:
   about: /about/ || fa fa-user
 
 social:
-  GitHub: https://github.com/yourname || fab fa-github
-  E-Mail: mailto:yourname@gmail.com || fa fa-envelope
+  GitHub: https://github.com/chao31 || fab fa-github
+  E-Mail: mailto:cucfortc@163.com || fa fa-envelope
+  稀土掘金: https://juejin.cn/user/2488950055501998/posts || fa-brands fa-buffer
+  FE-QA: https://chao31.github.io/FE-QA/ || fa-brands fa-teamspeak
 
 theme_color:
   light: "#C3B0D6"
