@@ -176,6 +176,7 @@ links_settings:
   layout: block
 
 links:
+  30-Seconds-Of-Code: https://www.30secondsofcode.org/
   myLetcode: https://chao31.github.io/myLetcode/
   FE-Interview-Questions: https://interview2.poetries.top/
   Awsome-Front: https://github.com/helloqingfeng/Awsome-Front-End-learning-resource
@@ -361,8 +362,8 @@ codeblock:
   # Code Highlight theme
   # All available themes: https://theme-next.js.org/highlight/
   theme:
-    light: obsidian
-    dark: obsidian
+    light: base16/darcula
+    dark: base16/darcula
   prism:
     light: prism
     dark: prism-dark
