@@ -177,6 +177,7 @@ links_settings:
 
 links:
   30-Seconds-Of-Code: https://www.30secondsofcode.org/
+  React 技术揭秘: https://react.iamkasong.com/
   myLetcode: https://chao31.github.io/myLetcode/
   FE-Interview-Questions: https://interview2.poetries.top/
   Awsome-Front: https://github.com/helloqingfeng/Awsome-Front-End-learning-resource
@@ -268,7 +269,7 @@ reward_settings:
   # If true, a donate button will be displayed in every article by default.
   enable: true
   animation: true
-  comment: 有钱的捧个钱场，没钱的捧个人场喽😜
+  comment: 有钱的捧个钱场，没钱的捧个人场😜
 
 reward:
   wechatpay: /images/wechatpay.JPG
