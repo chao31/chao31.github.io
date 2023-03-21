@@ -137,6 +137,6 @@ marked:
 ## 将代码打到 git 上
 deploy:
   type: git
-  repo: git@github.com:chao31/chao31.github.io.git
+  repo: https://github.com/chao31/chao31.github.io.git
   branch: gh-pages
   extend_dirs: []
