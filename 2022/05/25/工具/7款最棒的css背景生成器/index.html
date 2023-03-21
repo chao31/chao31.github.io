@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#C3B0D6"><meta name="generator" content="Hexo 6.3.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.svg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.svg">
+  <link rel="mask-icon" href="/favicon.svg" color="#C3B0D6">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css" integrity="sha256-DfWjNxDkM94fVBWx1H5BMMp0Zq7luBlV8QRcSES7s+0=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.11.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":null,"post_body":null,"coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="下面是我整理的 7 款自己最喜欢的背景生成工具，帮助大家生成各种各样的 style 样式或背景图，可生成 png、svg、甚至 css 代码，解决写完博客不知道从哪找图的尴尬。 pattern-css 引入 css，选择不同的 class 来生成很时尚的背景图 svgwave 生成波浪渐变背景，可生成 svg 代码，支持 chrome 下动态波动 haikei.app 各种渐变、波浪、气泡、想小方">
+<meta property="og:type" content="article">
+<meta property="og:title" content="7 款最棒的 css 背景生成器 🎨✨">
+<meta property="og:url" content="http://example.com/2022/05/25/%E5%B7%A5%E5%85%B7/7%E6%AC%BE%E6%9C%80%E6%A3%92%E7%9A%84css%E8%83%8C%E6%99%AF%E7%94%9F%E6%88%90%E5%99%A8/index.html">
+<meta property="og:site_name" content="唐超的博客">
+<meta property="og:description" content="下面是我整理的 7 款自己最喜欢的背景生成工具，帮助大家生成各种各样的 style 样式或背景图，可生成 png、svg、甚至 css 代码，解决写完博客不知道从哪找图的尴尬。 pattern-css 引入 css，选择不同的 class 来生成很时尚的背景图 svgwave 生成波浪渐变背景，可生成 svg 代码，支持 chrome 下动态波动 haikei.app 各种渐变、波浪、气泡、想小方">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/fb53858bb8444df299bf645869f39d7b~tplv-k3u1fbpfcp-watermark.image">
+<meta property="og:image" content="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/af266eef667f414aa12408b8a0430d6f~tplv-k3u1fbpfcp-watermark.image">
+<meta property="og:image" content="https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/0d0af2394a3943bd9a2898b2583d597d~tplv-k3u1fbpfcp-watermark.image">
+<meta property="og:image" content="https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/b3407eb803f440a386d4ecf97a25830e~tplv-k3u1fbpfcp-watermark.image">
+<meta property="og:image" content="https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/c2537886283041e4a87d79432c9b3d5a~tplv-k3u1fbpfcp-watermark.image">
+<meta property="og:image" content="https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/abb7104b66bf4483b221a98777fa4b0c~tplv-k3u1fbpfcp-watermark.image">
+<meta property="og:image" content="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/ed79d32a4cdc4806a3f367f01ce0be19~tplv-k3u1fbpfcp-watermark.image">
+<meta property="article:published_time" content="2022-05-25T00:00:59.000Z">
+<meta property="article:modified_time" content="2023-03-02T04:31:29.752Z">
+<meta property="article:author" content="Chao Tang">
+<meta property="article:tag" content="css">
+<meta property="article:tag" content="工具">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/fb53858bb8444df299bf645869f39d7b~tplv-k3u1fbpfcp-watermark.image">
+
+
+<link rel="canonical" href="http://example.com/2022/05/25/%E5%B7%A5%E5%85%B7/7%E6%AC%BE%E6%9C%80%E6%A3%92%E7%9A%84css%E8%83%8C%E6%99%AF%E7%94%9F%E6%88%90%E5%99%A8/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://example.com/2022/05/25/%E5%B7%A5%E5%85%B7/7%E6%AC%BE%E6%9C%80%E6%A3%92%E7%9A%84css%E8%83%8C%E6%99%AF%E7%94%9F%E6%88%90%E5%99%A8/","path":"2022/05/25/工具/7款最棒的css背景生成器/","title":"7 款最棒的 css 背景生成器 🎨✨"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>7 款最棒的 css 背景生成器 🎨✨ | 唐超的博客</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">唐超的博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">绘制我的前端技术图谱</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#pattern-css"><span class="nav-text">pattern-css</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#svgwave"><span class="nav-text">svgwave</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#haikei-app"><span class="nav-text">haikei.app</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#coolbackgrounds-io"><span class="nav-text">coolbackgrounds.io</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#gradienta"><span class="nav-text">gradienta</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#graphics"><span class="nav-text">graphics</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#pattern-monster"><span class="nav-text">pattern.monster</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Chao Tang"
+      src="/images/notion-avatar.svg">
+  <p class="site-author-name" itemprop="name">Chao Tang</p>
+  <div class="site-description" itemprop="description">沉淀技术之路上的点点滴滴</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/chao31" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;chao31" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:cucfortc@163.com" title="E-Mail → mailto:cucfortc@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://juejin.cn/user/2488950055501998/posts" title="稀土掘金 → https:&#x2F;&#x2F;juejin.cn&#x2F;user&#x2F;2488950055501998&#x2F;posts" rel="noopener" target="_blank"><i class="fa-brands fa-buffer fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://chao31.github.io/FE-QA/" title="FE-QA → https:&#x2F;&#x2F;chao31.github.io&#x2F;FE-QA&#x2F;" rel="noopener" target="_blank"><i class="fa-brands fa-teamspeak fa-fw"></i></a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll site-overview-item animated">
+    <div class="links-of-blogroll-title"><i class="fa-solid fa-earth-asia fa-fw"></i>
+      友链
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://www.30secondsofcode.org/" title="https:&#x2F;&#x2F;www.30secondsofcode.org&#x2F;" rel="noopener" target="_blank">30-Seconds-Of-Code</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://react.iamkasong.com/" title="https:&#x2F;&#x2F;react.iamkasong.com&#x2F;" rel="noopener" target="_blank">React 技术揭秘</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chao31.github.io/myLetcode/" title="https:&#x2F;&#x2F;chao31.github.io&#x2F;myLetcode&#x2F;" rel="noopener" target="_blank">myLetcode</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://interview2.poetries.top/" title="https:&#x2F;&#x2F;interview2.poetries.top&#x2F;" rel="noopener" target="_blank">FE-Interview-Questions</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://github.com/helloqingfeng/Awsome-Front-End-learning-resource" title="https:&#x2F;&#x2F;github.com&#x2F;helloqingfeng&#x2F;Awsome-Front-End-learning-resource" rel="noopener" target="_blank">Awsome-Front</a>
+        </li>
+    </ul>
+  </div>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/chao31" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/05/25/%E5%B7%A5%E5%85%B7/7%E6%AC%BE%E6%9C%80%E6%A3%92%E7%9A%84css%E8%83%8C%E6%99%AF%E7%94%9F%E6%88%90%E5%99%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/notion-avatar.svg">
+      <meta itemprop="name" content="Chao Tang">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="唐超的博客">
+      <meta itemprop="description" content="沉淀技术之路上的点点滴滴">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="7 款最棒的 css 背景生成器 🎨✨ | 唐超的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          7 款最棒的 css 背景生成器 🎨✨
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-05-25 08:00:59" itemprop="dateCreated datePublished" datetime="2022-05-25T08:00:59+08:00">2022-05-25</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-02 12:31:29" itemprop="dateModified" datetime="2023-03-02T12:31:29+08:00">2023-03-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">工具</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>下面是我整理的 7 款自己最喜欢的背景生成工具，帮助大家生成各种各样的 style 样式或背景图，可生成 png、svg、甚至 css 代码，解决写完博客不知道从哪找图的尴尬。</p>
+<h2 id="pattern-css"><a href="#pattern-css" class="headerlink" title="pattern-css"></a><a target="_blank" rel="noopener" href="https://bansal.io/pattern-css">pattern-css</a></h2><p><img data-src="https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/fb53858bb8444df299bf645869f39d7b~tplv-k3u1fbpfcp-watermark.image"></p>
+<p>引入 css，选择不同的 class 来生成很时尚的背景图</p>
+<h2 id="svgwave"><a href="#svgwave" class="headerlink" title="svgwave"></a><a target="_blank" rel="noopener" href="https://svgwave.in/">svgwave</a></h2><p><img data-src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/af266eef667f414aa12408b8a0430d6f~tplv-k3u1fbpfcp-watermark.image"></p>
+<p>生成波浪渐变背景，可生成 svg 代码，支持 chrome 下动态波动</p>
+<h2 id="haikei-app"><a href="#haikei-app" class="headerlink" title="haikei.app"></a><a target="_blank" rel="noopener" href="https://app.haikei.app/">haikei.app</a></h2><p><img data-src="https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/0d0af2394a3943bd9a2898b2583d597d~tplv-k3u1fbpfcp-watermark.image"></p>
+<p>各种渐变、波浪、气泡、想小方块、网格的背景，不仅可以生成 png，还可以生成 svg</p>
+<h2 id="coolbackgrounds-io"><a href="#coolbackgrounds-io" class="headerlink" title="coolbackgrounds.io"></a><a target="_blank" rel="noopener" href="https://coolbackgrounds.io/">coolbackgrounds.io</a></h2><p><img data-src="https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/b3407eb803f440a386d4ecf97a25830e~tplv-k3u1fbpfcp-watermark.image"></p>
+<p>主要有 5 种背景，三角渐变、动态点线图、梯田渐变、钢铁渐变</p>
+<h2 id="gradienta"><a href="#gradienta" class="headerlink" title="gradienta"></a><a target="_blank" rel="noopener" href="https://gradienta.io/editor">gradienta</a></h2><p><img data-src="https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/c2537886283041e4a87d79432c9b3d5a~tplv-k3u1fbpfcp-watermark.image"></p>
+<p>生成各种渐变背景，除了 svg、png、jpg 格式，还能生成 css</p>
+<h2 id="graphics"><a href="#graphics" class="headerlink" title="graphics"></a><a target="_blank" rel="noopener" href="https://products.ls.graphics/mesh-gradients/">graphics</a></h2><p><img data-src="https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/abb7104b66bf4483b221a98777fa4b0c~tplv-k3u1fbpfcp-watermark.image"><br>100 个免费的渐变背景图下载，只支持图片下载，图片体积还挺大</p>
+<h2 id="pattern-monster"><a href="#pattern-monster" class="headerlink" title="pattern.monster"></a><a target="_blank" rel="noopener" href="https://pattern.monster/">pattern.monster</a></h2><p><img data-src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/ed79d32a4cdc4806a3f367f01ce0be19~tplv-k3u1fbpfcp-watermark.image"><br>生成桌布一样的背景，可以增加点缀的色块个数，可以生成 svg、png、css</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>有钱的捧个钱场，没钱的捧个人场😜</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="/images/wechatpay.JPG" alt="Chao Tang 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="/images/alipay.JPG" alt="Chao Tang 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/css/" rel="tag"># css</a>
+              <a href="/tags/%E5%B7%A5%E5%85%B7/" rel="tag"># 工具</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/08/15/react/%E4%BB%8E0%E5%88%B01%E5%AE%9E%E7%8E%B0React1/" rel="prev" title="从 0 到 1 实现 React（一）—— 生成虚拟 dom">
+                  <i class="fa fa-chevron-left"></i> 从 0 到 1 实现 React（一）—— 生成虚拟 dom
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/06/15/react/react%E5%8E%9F%E7%90%86/" rel="next" title="react 原理">
+                  react 原理 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-cannabis"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">chaotang</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lozad@1.16.0/dist/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="https://cdn.jsdelivr.net/npm/hexo-generator-searchdb@1.4.0/dist/search.js" integrity="sha256-vXZMYLEqsROAXkEw93GGIvaB2ab+QW6w3+1ahD9nXXA=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+  
+
+
+
+
+
+</body>
+</html>

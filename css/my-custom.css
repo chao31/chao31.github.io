@@ -1,0 +1,64 @@
+.links-of-blogroll-list {
+  padding-left: 20px;
+}
+.links-of-blogroll-item {
+  text-align: left;
+}
+.post-body img {
+  margin: 0;
+  box-shadow: 0 1px 10px 0 rgba(0,0,0,0.4);
+}
+.post-body h1,
+.post-body h2,
+.post-body h3,
+.post-body h4,
+.post-body h5,
+.post-body h6 {
+  position: relative;
+}
+.post-body p code,
+.post-body li code,
+.post-body h1 code,
+.post-body h2 code,
+.post-body h3 code,
+.post-body h4 code,
+.post-body h5 code,
+.post-body h6 code {
+  padding: 5px 4px;
+  margin: 0 4px;
+  background: rgba(157,165,149,0.341);
+  color: rgba(40,44,52,0.78);
+}
+.post-body a {
+  text-decoration: underline;
+}
+.post-body a:hover {
+  border-bottom-color: #af3a03;
+  color: #af3a03;
+}
+code,
+kbd,
+figure.highlight,
+pre {
+  color: #86a0f0;
+}
+.diff .hljs-meta,
+.hljs-keyword,
+.hljs-template-tag,
+.hljs-type {
+  color: #b88080;
+}
+.hljs-class .hljs-title,
+.hljs-title,
+.hljs-title.class_ {
+  color: #f8c555;
+}
+.hljs-deletion {
+  color: #f50532;
+}
+.hljs-addition {
+  color: #b4eb72;
+}
+blockquote {
+  border-left-color: #6b8b8d;
+}

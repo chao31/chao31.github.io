@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#C3B0D6"><meta name="generator" content="Hexo 6.3.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.svg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.svg">
+  <link rel="mask-icon" href="/favicon.svg" color="#C3B0D6">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css" integrity="sha256-DfWjNxDkM94fVBWx1H5BMMp0Zq7luBlV8QRcSES7s+0=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.11.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":null,"post_body":null,"coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="quicklink是什么？quicklink 是一个通过预加载资源来提升访问速度的轻量级工具库（压缩后&lt; 1KB）,通过提前加载资源，使浏览器加载缓存资源，从而减少请求所消耗的时间，来达到快速打开页面的目的。 How it works？ Waits until the browser is idle (using requestIdleCallback)  Detects links wit">
+<meta property="og:type" content="article">
+<meta property="og:title" content="quicklink原理解析(一)">
+<meta property="og:url" content="http://example.com/2020/07/20/%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/quicklink%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%901/index.html">
+<meta property="og:site_name" content="唐超的博客">
+<meta property="og:description" content="quicklink是什么？quicklink 是一个通过预加载资源来提升访问速度的轻量级工具库（压缩后&lt; 1KB）,通过提前加载资源，使浏览器加载缓存资源，从而减少请求所消耗的时间，来达到快速打开页面的目的。 How it works？ Waits until the browser is idle (using requestIdleCallback)  Detects links wit">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2020/07/20/%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/quicklink%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%901/01.png">
+<meta property="og:image" content="http://example.com/2020/07/20/%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/quicklink%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%901/02.png">
+<meta property="article:published_time" content="2020-07-20T10:03:11.000Z">
+<meta property="article:modified_time" content="2023-03-02T04:31:29.753Z">
+<meta property="article:author" content="Chao Tang">
+<meta property="article:tag" content="源码解析">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2020/07/20/%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/quicklink%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%901/01.png">
+
+
+<link rel="canonical" href="http://example.com/2020/07/20/%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/quicklink%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%901/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://example.com/2020/07/20/%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/quicklink%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%901/","path":"2020/07/20/源码解析/quicklink原理解析1/","title":"quicklink原理解析(一)"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>quicklink原理解析(一) | 唐超的博客</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">唐超的博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">绘制我的前端技术图谱</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#quicklink%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-text">quicklink是什么？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#How-it-works%EF%BC%9F"><span class="nav-text">How it works？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E7%A1%AE%E5%AE%9A%E6%B5%8F%E8%A7%88%E5%99%A8%E6%98%AF%E5%90%A6%E7%A9%BA%E9%97%B2%EF%BC%9F"><span class="nav-text">如何确定浏览器是否空闲？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#requestIdleCallback-%E5%85%BC%E5%AE%B9%E5%A4%84%E7%90%86"><span class="nav-text">requestIdleCallback 兼容处理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E9%A2%84%E5%8A%A0%E8%BD%BD%E6%8C%87%E5%AE%9A%E8%B5%84%E6%BA%90%EF%BC%9F"><span class="nav-text">如何预加载指定资源？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DNS-Prefetch"><span class="nav-text">DNS Prefetch</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Preconnect"><span class="nav-text">Preconnect</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Prefetch"><span class="nav-text">Prefetch</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Preload"><span class="nav-text">Preload</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%8F%E8%A7%88%E5%99%A8%E8%B5%84%E6%BA%90%E7%9A%84%E4%BC%98%E5%85%88%E7%BA%A7"><span class="nav-text">浏览器资源的优先级</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Chao Tang"
+      src="/images/notion-avatar.svg">
+  <p class="site-author-name" itemprop="name">Chao Tang</p>
+  <div class="site-description" itemprop="description">沉淀技术之路上的点点滴滴</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/chao31" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;chao31" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:cucfortc@163.com" title="E-Mail → mailto:cucfortc@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://juejin.cn/user/2488950055501998/posts" title="稀土掘金 → https:&#x2F;&#x2F;juejin.cn&#x2F;user&#x2F;2488950055501998&#x2F;posts" rel="noopener" target="_blank"><i class="fa-brands fa-buffer fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://chao31.github.io/FE-QA/" title="FE-QA → https:&#x2F;&#x2F;chao31.github.io&#x2F;FE-QA&#x2F;" rel="noopener" target="_blank"><i class="fa-brands fa-teamspeak fa-fw"></i></a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll site-overview-item animated">
+    <div class="links-of-blogroll-title"><i class="fa-solid fa-earth-asia fa-fw"></i>
+      友链
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://www.30secondsofcode.org/" title="https:&#x2F;&#x2F;www.30secondsofcode.org&#x2F;" rel="noopener" target="_blank">30-Seconds-Of-Code</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://react.iamkasong.com/" title="https:&#x2F;&#x2F;react.iamkasong.com&#x2F;" rel="noopener" target="_blank">React 技术揭秘</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chao31.github.io/myLetcode/" title="https:&#x2F;&#x2F;chao31.github.io&#x2F;myLetcode&#x2F;" rel="noopener" target="_blank">myLetcode</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://interview2.poetries.top/" title="https:&#x2F;&#x2F;interview2.poetries.top&#x2F;" rel="noopener" target="_blank">FE-Interview-Questions</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://github.com/helloqingfeng/Awsome-Front-End-learning-resource" title="https:&#x2F;&#x2F;github.com&#x2F;helloqingfeng&#x2F;Awsome-Front-End-learning-resource" rel="noopener" target="_blank">Awsome-Front</a>
+        </li>
+    </ul>
+  </div>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/chao31" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/07/20/%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/quicklink%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%901/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/notion-avatar.svg">
+      <meta itemprop="name" content="Chao Tang">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="唐超的博客">
+      <meta itemprop="description" content="沉淀技术之路上的点点滴滴">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="quicklink原理解析(一) | 唐超的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          quicklink原理解析(一)
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-07-20 18:03:11" itemprop="dateCreated datePublished" datetime="2020-07-20T18:03:11+08:00">2020-07-20</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-02 12:31:29" itemprop="dateModified" datetime="2023-03-02T12:31:29+08:00">2023-03-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/" itemprop="url" rel="index"><span itemprop="name">源码解析</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="quicklink是什么？"><a href="#quicklink是什么？" class="headerlink" title="quicklink是什么？"></a>quicklink是什么？</h2><p>quicklink 是一个通过预加载资源来提升访问速度的轻量级工具库（压缩后&lt; 1KB）,通过提前加载资源，使浏览器加载缓存资源，从而减少请求所消耗的时间，来达到快速打开页面的目的。</p>
+<h2 id="How-it-works？"><a href="#How-it-works？" class="headerlink" title="How it works？"></a>How it works？</h2><ul>
+<li><p>Waits until the browser is idle (using requestIdleCallback)</p>
+</li>
+<li><p>Detects links within the viewport (using Intersection Observer)</p>
+</li>
+<li><p>Checks if the user isn’t on a slow connection (using navigator.connection.effectiveType) or has data-saver enabled (using navigator.connection.saveData)</p>
+</li>
+<li><p>Prefetches URLs to the links (using <link rel=prefetch> or XHR). Provides some control over the request priority (can switch to fetch() if supported).</p>
+</li>
+</ul>
+<h2 id="如何确定浏览器是否空闲？"><a href="#如何确定浏览器是否空闲？" class="headerlink" title="如何确定浏览器是否空闲？"></a>如何确定浏览器是否空闲？</h2><p>如果浏览器支持requestIdleCallback，则使用原生的函数，如果不支持，则使用setTimeout函数做ployfill。</p>
+<p>requestIdleCallback：它指定只有当一帧的末尾有空闲时间，才会执行回调函数。一般浏览器的刷新频率是60HZ，也就是说，只有当前帧的运行时间小于16.66ms时，函数fn才会执行。否则，就推迟到下一帧，如果下一帧也没有空闲时间，就推迟到下下一帧，以此类推。<br><code>requestIdleCallback(callback[, timeout])</code></p>
+<ol>
+<li><p>callback<br>callback会接收到一个名为callback deadline 的参数，它具有如下属性 :<br>timeRemaining() 方法返回当前帧还剩余的毫秒。这个方法只能读，不能写，而且会动态更新。因此可以不断检查这个属性，如果还有剩余时间的话，就不断执行某些任务。一旦这个属性等于0，就把任务分配到下一轮requestIdleCallback。<br>deadline对象的 didTimeout 属性会返回一个布尔值，表示指定的时间是否过期。这意味着，如果回调函数由于指定时间过期而触发</p>
+</li>
+<li><p>timeout<br>如果在指定 的这段时间之内，每一帧都没有空闲时间，那么函数fn将会强制执行。</p>
+</li>
+</ol>
+<h2 id="requestIdleCallback-兼容处理"><a href="#requestIdleCallback-兼容处理" class="headerlink" title="requestIdleCallback 兼容处理"></a>requestIdleCallback 兼容处理</h2><p>如果浏览器支持requestIdleCallback，则使用原生的函数，如果不支持，则使用setTimeout函数做ployfill。<br><img data-src="/2020/07/20/%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/quicklink%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%901/01.png"></p>
+<h2 id="如何预加载指定资源？"><a href="#如何预加载指定资源？" class="headerlink" title="如何预加载指定资源？"></a>如何预加载指定资源？</h2><p>常见的是通过一些技术手段来实现资源的预加载，例如使用XMLHttpRequest来获取资源并进行缓存。然而，这些技术都是应用层面的，并非Web标准，某些需求也无法准确实现，同时，在性能方面也存在着问题。好在目前已有相关的Web标准——Resource Hint，通过它，可以在浏览器原生层面实现这些功能，同时提供性能保证。</p>
+<p>Resource Hint有5种：</p>
+<ul>
+<li>DNS Prefetch</li>
+<li>Preconnect</li>
+<li>Preload</li>
+<li>Prefetch</li>
+<li>Prerender</li>
+</ul>
+<h2 id="DNS-Prefetch"><a href="#DNS-Prefetch" class="headerlink" title="DNS Prefetch"></a>DNS Prefetch</h2><p>DNS解析：查找域名对应的ip，会耗费大量的时间，所以可以利用DNS预解析。</p>
+<p>Resource Hint主要通过使用link标签。rel属性确定类型，href属性则指定相应的源或资源URL 。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">&quot;dns-prefetch&quot;</span> <span class="attr">href</span>=<span class="string">&quot;//yourwebsite.com&quot;</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="Preconnect"><a href="#Preconnect" class="headerlink" title="Preconnect"></a>Preconnect</h2><p>建立连接不仅需要DNS查询，还需要进行TCP协议握手，有些还会有TLS&#x2F;SSL协议，这些都会导致连接的耗时。因此，使用Preconnect可以帮助你告诉浏览器：“我有一些资源会用到某个源，可以帮我预先建立连接。”</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">&quot;preconnect&quot;</span> <span class="attr">href</span>=<span class="string">&quot;//yourwebsite.com&quot;</span>&gt;</span> </span><br></pre></td></tr></table></figure>
+<h2 id="Prefetch"><a href="#Prefetch" class="headerlink" title="Prefetch"></a>Prefetch</h2><p>你可以把Prefetch理解为资源预获取。一般来说，可以用Prefetch来指定在紧接着之后的操作或浏览中需要使用到的资源，让浏览器提前获取。由于仅仅是提前获取资源，因此浏览器不会对资源进行预处理，并且像CSS样式表、JavaScript脚本这样的资源是不会自动执行并应用于当前文档的。<br>在 Chrome 中，如果用户从一个页面跳转到另一个页面，prefetch 发起的请求仍会进行不会中断。<br>另外，prefetch 的资源在网络堆栈中至少缓存 5 分钟，无论它是不是可以缓存的。</p>
+<h2 id="Preload"><a href="#Preload" class="headerlink" title="Preload"></a>Preload</h2><p>preload 提供了一种声明式的命令，让浏览器提前加载指定资源(加载后并不执行)，需要执行时再执行<br>这样做的好处在于：<br>1、将加载和执行分离开，不阻塞渲染和document的onload事件<br>2、提前加载指定资源，不再出现依赖的font字体隔了一段时间才刷出的情况</p>
+<p>此外，preload 不会阻塞 windows 的 onload 事件</p>
+<p>Preload的使用注意：<br>对跨域的文件进行preload时，必须加上 crossorigin 属性<br>没有用到的 preload 资源在 Chrome 的 console 里会在 onload 事件 3s 后发生警告<br><img data-src="/2020/07/20/%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/quicklink%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%901/02.png"></p>
+<p>需要注意的是，和DNS Prefetch、Preconnect使用不太一样的地方是，Prefetch有一个as的可选属性，用来指定获取资源的类型。由于不同的资源类型会具有不同的优先级、CSP、请求头等，因此该属性很重要。</p>
+<h2 id="浏览器资源的优先级"><a href="#浏览器资源的优先级" class="headerlink" title="浏览器资源的优先级"></a>浏览器资源的优先级</h2><p>在Chrome浏览器中，不同的资源在浏览器渲染的不同阶段进行加载的优先级不同</p>
+<p>一共分成五个级别</p>
+<p>Highest 最高<br>Hight 高<br>Medium 中等<br>Low 低<br>Lowest 最低</p>
+<p>其中主资源HTML和CSS的优先级最高，其他资源根据情况的不同优先级不一，JS脚本根据它们在文件中的位置是否异步、延迟或阻塞获得不同的优先级：<br>1、网络在第一个图片资源之前阻塞的脚本在网络优先级中是中级<br>2、网络在第一个图片资源之后阻塞的脚本在网络优先级中是低级<br>3、异步／延迟／插入的脚本（无论在什么位置）在网络优先级中是很低级</p>
+<p>图片（视口可见）将会获得相对于视口不可见图片（低级）的更高的优先级（中级），所以某些程度上 Chrome 将会尽量懒加载这些图片。低优先级的图片在布局完成被视口发现时，将会获得优先级提升</p>
+<p>预加载 使用 “as” 属性加载的资源将会获得与资源 “type” 属性所拥有的相同的优先级。比如说，preload as&#x3D;”style” 将会获得比 as&#x3D;“script” 更高的优先级</p>
+<p>不带 “as” 属性的 预加载 的优先级将会等同于异步请求，如果忽略 as 属性，或者错误的 as 属性会使 预加载 等同于 XHR 请求，浏览器不知道加载的是什么，因此会赋予此类资源非常低的加载优先级</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>有钱的捧个钱场，没钱的捧个人场😜</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="/images/wechatpay.JPG" alt="Chao Tang 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="/images/alipay.JPG" alt="Chao Tang 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/" rel="tag"># 源码解析</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/06/14/vue/Vue%E6%A8%A1%E6%9D%BF%E7%BC%96%E8%AF%91%E5%99%A8%E5%8E%9F%E7%90%86/" rel="prev" title="Vue模板编译器原理">
+                  <i class="fa fa-chevron-left"></i> Vue模板编译器原理
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/07/29/%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/quicklink%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%902/" rel="next" title="quicklink原理解析(二)">
+                  quicklink原理解析(二) <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-cannabis"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">chaotang</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lozad@1.16.0/dist/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="https://cdn.jsdelivr.net/npm/hexo-generator-searchdb@1.4.0/dist/search.js" integrity="sha256-vXZMYLEqsROAXkEw93GGIvaB2ab+QW6w3+1ahD9nXXA=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+  
+
+
+
+
+
+</body>
+</html>

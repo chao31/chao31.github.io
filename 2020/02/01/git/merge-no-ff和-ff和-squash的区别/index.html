@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#C3B0D6"><meta name="generator" content="Hexo 6.3.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.svg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.svg">
+  <link rel="mask-icon" href="/favicon.svg" color="#C3B0D6">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css" integrity="sha256-DfWjNxDkM94fVBWx1H5BMMp0Zq7luBlV8QRcSES7s+0=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.11.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":null,"post_body":null,"coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="一张图来告诉你–no-ff和–ff git merge 我们平常什么都不加的时候，则使用默认的 –ff ， 即 fast-forward 方式   fast-forward方式就是当条件允许的时候，git直接把HEAD指针指向合并分支的头，完成合并。属于“快进方式”，不过这种情况如果删除分支，则会丢失分支信息。因为在这个过程中没有创建commit  git merge –no-ff1指的是强行关闭">
+<meta property="og:type" content="article">
+<meta property="og:title" content="merge--no-ff和--ff和--squash的区别">
+<meta property="og:url" content="http://example.com/2020/02/01/git/merge-no-ff%E5%92%8C-ff%E5%92%8C-squash%E7%9A%84%E5%8C%BA%E5%88%AB/index.html">
+<meta property="og:site_name" content="唐超的博客">
+<meta property="og:description" content="一张图来告诉你–no-ff和–ff git merge 我们平常什么都不加的时候，则使用默认的 –ff ， 即 fast-forward 方式   fast-forward方式就是当条件允许的时候，git直接把HEAD指针指向合并分支的头，完成合并。属于“快进方式”，不过这种情况如果删除分支，则会丢失分支信息。因为在这个过程中没有创建commit  git merge –no-ff1指的是强行关闭">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2020/02/01/git/merge-no-ff%E5%92%8C-ff%E5%92%8C-squash%E7%9A%84%E5%8C%BA%E5%88%AB/b6.png">
+<meta property="og:image" content="http://example.com/2020/02/01/git/merge-no-ff%E5%92%8C-ff%E5%92%8C-squash%E7%9A%84%E5%8C%BA%E5%88%AB/b1.gif">
+<meta property="og:image" content="http://example.com/2020/02/01/git/merge-no-ff%E5%92%8C-ff%E5%92%8C-squash%E7%9A%84%E5%8C%BA%E5%88%AB/b2.gif">
+<meta property="og:image" content="http://example.com/2020/02/01/git/merge-no-ff%E5%92%8C-ff%E5%92%8C-squash%E7%9A%84%E5%8C%BA%E5%88%AB/b3.gif">
+<meta property="og:image" content="http://example.com/2020/02/01/git/merge-no-ff%E5%92%8C-ff%E5%92%8C-squash%E7%9A%84%E5%8C%BA%E5%88%AB/b4.gif">
+<meta property="og:image" content="http://example.com/2020/02/01/git/merge-no-ff%E5%92%8C-ff%E5%92%8C-squash%E7%9A%84%E5%8C%BA%E5%88%AB/b5.png">
+<meta property="og:image" content="http://example.com/2020/02/01/git/merge-no-ff%E5%92%8C-ff%E5%92%8C-squash%E7%9A%84%E5%8C%BA%E5%88%AB/a1.png">
+<meta property="og:image" content="http://example.com/2020/02/01/git/merge-no-ff%E5%92%8C-ff%E5%92%8C-squash%E7%9A%84%E5%8C%BA%E5%88%AB/a2.png">
+<meta property="og:image" content="http://example.com/2020/02/01/git/merge-no-ff%E5%92%8C-ff%E5%92%8C-squash%E7%9A%84%E5%8C%BA%E5%88%AB/a3.png">
+<meta property="og:image" content="http://example.com/2020/02/01/git/merge-no-ff%E5%92%8C-ff%E5%92%8C-squash%E7%9A%84%E5%8C%BA%E5%88%AB/a4.png">
+<meta property="article:published_time" content="2020-02-01T03:52:12.000Z">
+<meta property="article:modified_time" content="2023-03-02T04:31:29.731Z">
+<meta property="article:author" content="Chao Tang">
+<meta property="article:tag" content="git">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2020/02/01/git/merge-no-ff%E5%92%8C-ff%E5%92%8C-squash%E7%9A%84%E5%8C%BA%E5%88%AB/b6.png">
+
+
+<link rel="canonical" href="http://example.com/2020/02/01/git/merge-no-ff%E5%92%8C-ff%E5%92%8C-squash%E7%9A%84%E5%8C%BA%E5%88%AB/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://example.com/2020/02/01/git/merge-no-ff%E5%92%8C-ff%E5%92%8C-squash%E7%9A%84%E5%8C%BA%E5%88%AB/","path":"2020/02/01/git/merge-no-ff和-ff和-squash的区别/","title":"merge--no-ff和--ff和--squash的区别"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>merge--no-ff和--ff和--squash的区别 | 唐超的博客</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">唐超的博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">绘制我的前端技术图谱</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E5%BC%A0%E5%9B%BE%E6%9D%A5%E5%91%8A%E8%AF%89%E4%BD%A0%E2%80%93no-ff%E5%92%8C%E2%80%93ff"><span class="nav-text">一张图来告诉你–no-ff和–ff</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#git-merge"><span class="nav-text">git merge</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#git-merge-%E2%80%93no-ff"><span class="nav-text">git merge –no-ff</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#git-merge-%E2%80%93squash"><span class="nav-text">git merge –squash</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A8%E5%9B%BE%E6%9D%A5%E5%91%8A%E8%AF%89%E5%87%A0%E7%A7%8D%E5%90%88%E5%B9%B6%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-text">动图来告诉几种合并的区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BE%E4%B8%AA%E4%BE%8B%E5%AD%90"><span class="nav-text">举个例子</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Chao Tang"
+      src="/images/notion-avatar.svg">
+  <p class="site-author-name" itemprop="name">Chao Tang</p>
+  <div class="site-description" itemprop="description">沉淀技术之路上的点点滴滴</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/chao31" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;chao31" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:cucfortc@163.com" title="E-Mail → mailto:cucfortc@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://juejin.cn/user/2488950055501998/posts" title="稀土掘金 → https:&#x2F;&#x2F;juejin.cn&#x2F;user&#x2F;2488950055501998&#x2F;posts" rel="noopener" target="_blank"><i class="fa-brands fa-buffer fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://chao31.github.io/FE-QA/" title="FE-QA → https:&#x2F;&#x2F;chao31.github.io&#x2F;FE-QA&#x2F;" rel="noopener" target="_blank"><i class="fa-brands fa-teamspeak fa-fw"></i></a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll site-overview-item animated">
+    <div class="links-of-blogroll-title"><i class="fa-solid fa-earth-asia fa-fw"></i>
+      友链
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://www.30secondsofcode.org/" title="https:&#x2F;&#x2F;www.30secondsofcode.org&#x2F;" rel="noopener" target="_blank">30-Seconds-Of-Code</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://react.iamkasong.com/" title="https:&#x2F;&#x2F;react.iamkasong.com&#x2F;" rel="noopener" target="_blank">React 技术揭秘</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chao31.github.io/myLetcode/" title="https:&#x2F;&#x2F;chao31.github.io&#x2F;myLetcode&#x2F;" rel="noopener" target="_blank">myLetcode</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://interview2.poetries.top/" title="https:&#x2F;&#x2F;interview2.poetries.top&#x2F;" rel="noopener" target="_blank">FE-Interview-Questions</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://github.com/helloqingfeng/Awsome-Front-End-learning-resource" title="https:&#x2F;&#x2F;github.com&#x2F;helloqingfeng&#x2F;Awsome-Front-End-learning-resource" rel="noopener" target="_blank">Awsome-Front</a>
+        </li>
+    </ul>
+  </div>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/chao31" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/02/01/git/merge-no-ff%E5%92%8C-ff%E5%92%8C-squash%E7%9A%84%E5%8C%BA%E5%88%AB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/notion-avatar.svg">
+      <meta itemprop="name" content="Chao Tang">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="唐超的博客">
+      <meta itemprop="description" content="沉淀技术之路上的点点滴滴">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="merge--no-ff和--ff和--squash的区别 | 唐超的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          merge--no-ff和--ff和--squash的区别
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-02-01 11:52:12" itemprop="dateCreated datePublished" datetime="2020-02-01T11:52:12+08:00">2020-02-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-02 12:31:29" itemprop="dateModified" datetime="2023-03-02T12:31:29+08:00">2023-03-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/git/" itemprop="url" rel="index"><span itemprop="name">git</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h3 id="一张图来告诉你–no-ff和–ff"><a href="#一张图来告诉你–no-ff和–ff" class="headerlink" title="一张图来告诉你–no-ff和–ff"></a>一张图来告诉你–no-ff和–ff</h3><p><img data-src="/2020/02/01/git/merge-no-ff%E5%92%8C-ff%E5%92%8C-squash%E7%9A%84%E5%8C%BA%E5%88%AB/b6.png"></p>
+<h3 id="git-merge"><a href="#git-merge" class="headerlink" title="git merge"></a>git merge</h3><blockquote>
+<p>我们平常什么都不加的时候，则使用默认的 –ff ， 即 fast-forward 方式</p>
+</blockquote>
+<blockquote>
+<p>fast-forward方式就是当条件允许的时候，git直接把HEAD指针指向合并分支的头，完成合并。属于“快进方式”，不过这种情况如果删除分支，则会丢失分支信息。因为在这个过程中没有创建commit</p>
+</blockquote>
+<h3 id="git-merge-–no-ff"><a href="#git-merge-–no-ff" class="headerlink" title="git merge –no-ff"></a>git merge –no-ff</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">指的是强行关闭fast-forward方式,保留分支的commit历史</span><br></pre></td></tr></table></figure>
+
+<h3 id="git-merge-–squash"><a href="#git-merge-–squash" class="headerlink" title="git merge –squash"></a>git merge –squash</h3><blockquote>
+<p>是用来把一些不必要commit进行压缩，比如说，你的feature在开发的时候写的commit很乱，那么我们合并的时候不希望把这些历史commit带过来，于是使用</p>
+</blockquote>
+<h3 id="动图来告诉几种合并的区别"><a href="#动图来告诉几种合并的区别" class="headerlink" title="动图来告诉几种合并的区别"></a>动图来告诉几种合并的区别</h3><p><img data-src="/2020/02/01/git/merge-no-ff%E5%92%8C-ff%E5%92%8C-squash%E7%9A%84%E5%8C%BA%E5%88%AB/b1.gif"><br><img data-src="/2020/02/01/git/merge-no-ff%E5%92%8C-ff%E5%92%8C-squash%E7%9A%84%E5%8C%BA%E5%88%AB/b2.gif"><br><img data-src="/2020/02/01/git/merge-no-ff%E5%92%8C-ff%E5%92%8C-squash%E7%9A%84%E5%8C%BA%E5%88%AB/b3.gif"><br><img data-src="/2020/02/01/git/merge-no-ff%E5%92%8C-ff%E5%92%8C-squash%E7%9A%84%E5%8C%BA%E5%88%AB/b4.gif"><br><img data-src="/2020/02/01/git/merge-no-ff%E5%92%8C-ff%E5%92%8C-squash%E7%9A%84%E5%8C%BA%E5%88%AB/b5.png"></p>
+<h3 id="举个例子"><a href="#举个例子" class="headerlink" title="举个例子"></a>举个例子</h3><p><img data-src="/2020/02/01/git/merge-no-ff%E5%92%8C-ff%E5%92%8C-squash%E7%9A%84%E5%8C%BA%E5%88%AB/a1.png"></p>
+<blockquote>
+<p>在master分支上，执行<code>git merge hotfix</code><br>然后看到了Fast-forward 的字样，hotfix通过–ff的方式合进了master，如下：<br><img data-src="/2020/02/01/git/merge-no-ff%E5%92%8C-ff%E5%92%8C-squash%E7%9A%84%E5%8C%BA%E5%88%AB/a2.png"><br>仅仅是master指针指向了这个提交C4。这样是一种比较快的合并方式，轻量级，简单。<br>这个时候，我们往往会删掉hotfix分支，因为它的历史作用已经结束，这个时候，我们的iss53这个功能又向前开发，进行了一次提交，到了C5，那么变成了这样：<br><img data-src="/2020/02/01/git/merge-no-ff%E5%92%8C-ff%E5%92%8C-squash%E7%9A%84%E5%8C%BA%E5%88%AB/a3.png"><br>然后，我们要把iss53 这个分支合并回master，因为有分叉，两个版本的内容要进行合并,是不能用Fast-forward（只有在没有需要合并内容的时候，会有这个fast-forward 方式的提交） ，这时用的就是–no-ff的效果，并生成了一个新的commit号<br><img data-src="/2020/02/01/git/merge-no-ff%E5%92%8C-ff%E5%92%8C-squash%E7%9A%84%E5%8C%BA%E5%88%AB/a4.png"><br>如果我们对第一次合并，使用了–no-ff参数，那么也会产生这样的结果，生成一个新的提交，实际上等于是对C4 进行一次复制，创建一个新的commit，这就是–no-ff的作用。</p>
+</blockquote>
+<p>参考:<br><a target="_blank" rel="noopener" href="https://www.codenong.com/9069061/">“git merge”和”git merge–no ff”有什么区别？</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/chaiyu2002/article/details/81020370">Git：git-merge的–ff和–no-ff</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>有钱的捧个钱场，没钱的捧个人场😜</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="/images/wechatpay.JPG" alt="Chao Tang 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="/images/alipay.JPG" alt="Chao Tang 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/git/" rel="tag"># git</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/01/28/git/rebase%E5%92%8Cmerge%E7%9A%84%E5%8C%BA%E5%88%AB/" rel="prev" title="git rebase和git merge的区别">
+                  <i class="fa fa-chevron-left"></i> git rebase和git merge的区别
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/06/12/vue/%E6%B5%85%E8%B0%88vue%E4%B8%ADkey%E7%9A%84%E4%BD%9C%E7%94%A8/" rel="next" title="浅谈vue中key的作用">
+                  浅谈vue中key的作用 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-cannabis"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">chaotang</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lozad@1.16.0/dist/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="https://cdn.jsdelivr.net/npm/hexo-generator-searchdb@1.4.0/dist/search.js" integrity="sha256-vXZMYLEqsROAXkEw93GGIvaB2ab+QW6w3+1ahD9nXXA=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+  
+
+
+
+
+
+</body>
+</html>
