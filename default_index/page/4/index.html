@@ -237,6 +237,531 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/06/12/vue/%E6%B5%85%E8%B0%88vue%E4%B8%ADkey%E7%9A%84%E4%BD%9C%E7%94%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/notion-avatar.svg">
+      <meta itemprop="name" content="Chao Tang">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="唐超的博客">
+      <meta itemprop="description" content="沉淀技术之路上的点点滴滴">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 唐超的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2020/06/12/vue/%E6%B5%85%E8%B0%88vue%E4%B8%ADkey%E7%9A%84%E4%BD%9C%E7%94%A8/" class="post-title-link" itemprop="url">浅谈vue中key的作用</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-06-12 10:06:27" itemprop="dateCreated datePublished" datetime="2020-06-12T10:06:27+08:00">2020-06-12</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-02 12:31:29" itemprop="dateModified" datetime="2023-03-02T12:31:29+08:00">2023-03-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/vue/" itemprop="url" rel="index"><span itemprop="name">vue</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="举一个例子"><a href="#举一个例子" class="headerlink" title="举一个例子"></a>举一个例子</h2><p>例如：data数组从 [1,2,3] 变成了 [1,3]，也就是删除了中间的2，vue会如何处理？</p>
+<h2 id="v-for不加key"><a href="#v-for不加key" class="headerlink" title="v-for不加key"></a>v-for不加key</h2><p><img data-src="/2020/06/12/vue/%E6%B5%85%E8%B0%88vue%E4%B8%ADkey%E7%9A%84%E4%BD%9C%E7%94%A8/1.jpg"><br>注意看图中的绿色正方形没有被删除,原因很简单，你认为你删除了2，但Vue会认为你做了两件事：把2变成了3，然后把3删除了。<br>所以发现，此时vue的diff对比的过程如下：<br>首先对比 1 和 1，发现「1 没变」；然后对比 2 和 3发现「2 变成了 3」；最后对比 undefined 和 3，发现「3 被删除了」。</p>
+<h2 id="v-for加key"><a href="#v-for加key" class="headerlink" title="v-for加key"></a>v-for加key</h2><p><img data-src="/2020/06/12/vue/%E6%B5%85%E8%B0%88vue%E4%B8%ADkey%E7%9A%84%E4%BD%9C%E7%94%A8/2.jpg"><br>注意，这次vue把中间的2删除了，diff的过程详情参考后续对diff算法介绍的文章，但简单的讲，就是会先对比：<br>1.新头和旧头<br>2.新尾和旧尾<br>这里两步已经识别了，1，3相同，然后移动指针后移，发现对比结束，并删除多余的2<br>[1,2,3]–&gt;[1,3]</p>
+<h2 id="为什么v-for不使用index做为key"><a href="#为什么v-for不使用index做为key" class="headerlink" title="为什么v-for不使用index做为key"></a>为什么v-for不使用index做为key</h2><p>如果你用 index 作为 key，那么在删除第二项的时候，index 就会从 1 2 3 变成 1 2（因为 index 永远都是连续的，所以不可能是 1 3），那么 Vue 依然会认为你删除的是第三项。也就是会遇到上面一样的 bug。<br>注意看官网中的demo，用的是data中的id，而不是v-for的index</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;div v-<span class="keyword">for</span>=<span class="string">&quot;item in items&quot;</span> v-<span class="attr">bind</span>:key=<span class="string">&quot;item.id&quot;</span>&gt;</span><br><span class="line">  &lt;!-- 内容 --&gt;</span><br><span class="line">&lt;/div&gt;</span><br></pre></td></tr></table></figure>
+
+<h2 id="v-if中的key"><a href="#v-if中的key" class="headerlink" title="v-if中的key"></a>v-if中的key</h2><p>用 key 管理可复用的元素：<br>Vue 会尽可能高效地渲染元素，通常会复用已有元素而不是从头开始渲染。这么做除了使 Vue 变得非常快之外，还有其它一些好处。例如，如果你允许用户在不同的登录方式之间切换：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">template</span> <span class="attr">v-if</span>=<span class="string">&quot;loginType === &#x27;username&#x27;&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">label</span>&gt;</span>Username<span class="tag">&lt;/<span class="name">label</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">input</span> <span class="attr">placeholder</span>=<span class="string">&quot;Enter your username&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">template</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">template</span> <span class="attr">v-else</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">label</span>&gt;</span>Email<span class="tag">&lt;/<span class="name">label</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">input</span> <span class="attr">placeholder</span>=<span class="string">&quot;Enter your email address&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">template</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>那么在上面的代码中切换 loginType 将不会清除用户已经输入的内容。因为两个模板使用了相同的元素，<code>&lt;input&gt;</code> 不会被替换掉——仅仅是替换了它的 placeholder<br>这样也不总是符合实际需求，所以 Vue 为你提供了一种方式来表达“这两个元素是完全独立的，不要复用它们”。只需添加一个具有唯一值的 key attribute 即可</p>
+<h2 id="v-for中的key"><a href="#v-for中的key" class="headerlink" title="v-for中的key"></a>v-for中的key</h2><p>当 Vue 正在更新使用 v-for 渲染的元素列表时，它默认使用“就地更新”的策略。如果数据项的顺序被改变，Vue 将不会移动 DOM 元素来匹配数据项的顺序，而是就地更新每个元素，并且确保它们在每个索引位置正确渲染。</p>
+<p>为了给 Vue 一个提示，以便它能跟踪每个节点的身份，从而重用和重新排序现有元素，你需要为每项提供一个唯一 key attribute：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;div v-<span class="keyword">for</span>=<span class="string">&quot;item in items&quot;</span> v-<span class="attr">bind</span>:key=<span class="string">&quot;item.id&quot;</span>&gt;</span><br><span class="line">  &lt;!-- 内容 --&gt;</span><br><span class="line">&lt;/div&gt;</span><br></pre></td></tr></table></figure>
+<p>建议尽可能在使用 v-for 时提供 key attribute，除非遍历输出的 DOM 内容非常简单，或者是刻意依赖默认行为以获取性能上的提升。</p>
+<p>因为它是 Vue 识别节点的一个通用机制，key 并不仅与 v-for 特别关联。后面我们将在指南中看到，它还具有其它用途。</p>
+<h2 id="key"><a href="#key" class="headerlink" title="key"></a>key</h2><p>key 的特殊 attribute 主要用在 Vue 的虚拟 DOM 算法，在新旧 nodes 对比时辨识 VNodes。如果不使用 key，Vue 会使用一种最大限度减少动态元素并且尽可能的尝试就地修改&#x2F;复用相同类型元素的算法。而使用 key 时，它会基于 key 的变化重新排列元素顺序，并且会移除 key 不存在的元素。</p>
+<p>有相同父元素的子元素必须有独特的 key。重复的 key 会造成渲染错误。</p>
+<p>最常见的用例是结合 v-for：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;ul&gt;</span><br><span class="line">  <span class="language-xml"><span class="tag">&lt;<span class="name">li</span> <span class="attr">v-for</span>=<span class="string">&quot;item in items&quot;</span> <span class="attr">:key</span>=<span class="string">&quot;item.id&quot;</span>&gt;</span>...<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span></span><br><span class="line">&lt;/ul&gt;</span><br></pre></td></tr></table></figure>
+<p>它也可以用于强制替换元素&#x2F;组件而不是重复使用它。当你遇到如下场景时它可能会很有用：</p>
+<ul>
+<li>完整地触发组件的生命周期钩子</li>
+<li>触发过渡<br>例如：<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">transition</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">span</span> <span class="attr">:key</span>=<span class="string">&quot;text&quot;</span>&gt;</span>&#123;&#123; text &#125;&#125;<span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">transition</span>&gt;</span></span><br></pre></td></tr></table></figure>
+当 text 发生改变时，<span> 总是会被替换而不是被修改，因此会触发过渡。</li>
+</ul>
+<p>参考：<br><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/61064119/answer/766607894">https://www.zhihu.com/question/61064119/answer/766607894</a></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/02/01/git/merge-no-ff%E5%92%8C-ff%E5%92%8C-squash%E7%9A%84%E5%8C%BA%E5%88%AB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/notion-avatar.svg">
+      <meta itemprop="name" content="Chao Tang">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="唐超的博客">
+      <meta itemprop="description" content="沉淀技术之路上的点点滴滴">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 唐超的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2020/02/01/git/merge-no-ff%E5%92%8C-ff%E5%92%8C-squash%E7%9A%84%E5%8C%BA%E5%88%AB/" class="post-title-link" itemprop="url">merge--no-ff和--ff和--squash的区别</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-02-01 11:52:12" itemprop="dateCreated datePublished" datetime="2020-02-01T11:52:12+08:00">2020-02-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-02 12:31:29" itemprop="dateModified" datetime="2023-03-02T12:31:29+08:00">2023-03-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/git/" itemprop="url" rel="index"><span itemprop="name">git</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h3 id="一张图来告诉你–no-ff和–ff"><a href="#一张图来告诉你–no-ff和–ff" class="headerlink" title="一张图来告诉你–no-ff和–ff"></a>一张图来告诉你–no-ff和–ff</h3><p><img data-src="/2020/02/01/git/merge-no-ff%E5%92%8C-ff%E5%92%8C-squash%E7%9A%84%E5%8C%BA%E5%88%AB/b6.png"></p>
+<h3 id="git-merge"><a href="#git-merge" class="headerlink" title="git merge"></a>git merge</h3><blockquote>
+<p>我们平常什么都不加的时候，则使用默认的 –ff ， 即 fast-forward 方式</p>
+</blockquote>
+<blockquote>
+<p>fast-forward方式就是当条件允许的时候，git直接把HEAD指针指向合并分支的头，完成合并。属于“快进方式”，不过这种情况如果删除分支，则会丢失分支信息。因为在这个过程中没有创建commit</p>
+</blockquote>
+<h3 id="git-merge-–no-ff"><a href="#git-merge-–no-ff" class="headerlink" title="git merge –no-ff"></a>git merge –no-ff</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">指的是强行关闭fast-forward方式,保留分支的commit历史</span><br></pre></td></tr></table></figure>
+
+<h3 id="git-merge-–squash"><a href="#git-merge-–squash" class="headerlink" title="git merge –squash"></a>git merge –squash</h3><blockquote>
+<p>是用来把一些不必要commit进行压缩，比如说，你的feature在开发的时候写的commit很乱，那么我们合并的时候不希望把这些历史commit带过来，于是使用</p>
+</blockquote>
+<h3 id="动图来告诉几种合并的区别"><a href="#动图来告诉几种合并的区别" class="headerlink" title="动图来告诉几种合并的区别"></a>动图来告诉几种合并的区别</h3><p><img data-src="/2020/02/01/git/merge-no-ff%E5%92%8C-ff%E5%92%8C-squash%E7%9A%84%E5%8C%BA%E5%88%AB/b1.gif"><br><img data-src="/2020/02/01/git/merge-no-ff%E5%92%8C-ff%E5%92%8C-squash%E7%9A%84%E5%8C%BA%E5%88%AB/b2.gif"><br><img data-src="/2020/02/01/git/merge-no-ff%E5%92%8C-ff%E5%92%8C-squash%E7%9A%84%E5%8C%BA%E5%88%AB/b3.gif"><br><img data-src="/2020/02/01/git/merge-no-ff%E5%92%8C-ff%E5%92%8C-squash%E7%9A%84%E5%8C%BA%E5%88%AB/b4.gif"><br><img data-src="/2020/02/01/git/merge-no-ff%E5%92%8C-ff%E5%92%8C-squash%E7%9A%84%E5%8C%BA%E5%88%AB/b5.png"></p>
+<h3 id="举个例子"><a href="#举个例子" class="headerlink" title="举个例子"></a>举个例子</h3><p><img data-src="/2020/02/01/git/merge-no-ff%E5%92%8C-ff%E5%92%8C-squash%E7%9A%84%E5%8C%BA%E5%88%AB/a1.png"></p>
+<blockquote>
+<p>在master分支上，执行<code>git merge hotfix</code><br>然后看到了Fast-forward 的字样，hotfix通过–ff的方式合进了master，如下：<br><img data-src="/2020/02/01/git/merge-no-ff%E5%92%8C-ff%E5%92%8C-squash%E7%9A%84%E5%8C%BA%E5%88%AB/a2.png"><br>仅仅是master指针指向了这个提交C4。这样是一种比较快的合并方式，轻量级，简单。<br>这个时候，我们往往会删掉hotfix分支，因为它的历史作用已经结束，这个时候，我们的iss53这个功能又向前开发，进行了一次提交，到了C5，那么变成了这样：<br><img data-src="/2020/02/01/git/merge-no-ff%E5%92%8C-ff%E5%92%8C-squash%E7%9A%84%E5%8C%BA%E5%88%AB/a3.png"><br>然后，我们要把iss53 这个分支合并回master，因为有分叉，两个版本的内容要进行合并,是不能用Fast-forward（只有在没有需要合并内容的时候，会有这个fast-forward 方式的提交） ，这时用的就是–no-ff的效果，并生成了一个新的commit号<br><img data-src="/2020/02/01/git/merge-no-ff%E5%92%8C-ff%E5%92%8C-squash%E7%9A%84%E5%8C%BA%E5%88%AB/a4.png"><br>如果我们对第一次合并，使用了–no-ff参数，那么也会产生这样的结果，生成一个新的提交，实际上等于是对C4 进行一次复制，创建一个新的commit，这就是–no-ff的作用。</p>
+</blockquote>
+<p>参考:<br><a target="_blank" rel="noopener" href="https://www.codenong.com/9069061/">“git merge”和”git merge–no ff”有什么区别？</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/chaiyu2002/article/details/81020370">Git：git-merge的–ff和–no-ff</a></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/01/28/git/rebase%E5%92%8Cmerge%E7%9A%84%E5%8C%BA%E5%88%AB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/notion-avatar.svg">
+      <meta itemprop="name" content="Chao Tang">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="唐超的博客">
+      <meta itemprop="description" content="沉淀技术之路上的点点滴滴">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 唐超的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2020/01/28/git/rebase%E5%92%8Cmerge%E7%9A%84%E5%8C%BA%E5%88%AB/" class="post-title-link" itemprop="url">git rebase和git merge的区别</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-01-28 16:03:55" itemprop="dateCreated datePublished" datetime="2020-01-28T16:03:55+08:00">2020-01-28</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-02 12:31:29" itemprop="dateModified" datetime="2023-03-02T12:31:29+08:00">2023-03-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/git/" itemprop="url" rel="index"><span itemprop="name">git</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>假设有个开发过程如下：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1. master分支有两个commit：C1 -&gt; C2</span><br><span class="line">2. 我基于master切一个dev分支进行开发</span><br><span class="line">3. dev分支在今天下午生成了3个commit，分别在：C3(2点)-&gt; C4(3点) -&gt; C5(6点)</span><br><span class="line">4. 同样在今天下午，其它开发者先于我在master分支上合入了自己的分支，C6(4点) -&gt; C7(5点)，所以远程的master就变成了C1 -&gt; C2 -&gt; C6(4点) -&gt; C7(5点)</span><br></pre></td></tr></table></figure>
+<p>如下图：<br><img data-src="/2020/01/28/git/rebase%E5%92%8Cmerge%E7%9A%84%E5%8C%BA%E5%88%AB/a1.jpg"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">5. 在7点，我想把我的dev分支合进master，有两种选择：merge和rebase</span><br></pre></td></tr></table></figure>
+
+<h3 id="使用git-merge"><a href="#使用git-merge" class="headerlink" title="使用git merge"></a>使用git merge</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1. 在master上，执行`git merge dev`</span><br><span class="line">2. git会找出master和dev的最近共同祖先commit点，即分叉点C2</span><br><span class="line">3. 然后进行合并，将dev最后1次的commit（C5）和master最后一次commit（C7）合并后生成一个新的commit（C8），有冲突的话需要解决冲突</span><br><span class="line">4. 再将C8和C2之间的所有commit，按提交时间顺序进行排序</span><br><span class="line">5. 最后生成的master：C1 -&gt; C2 -&gt;C3(2点)-&gt; C4(3点) -&gt; C6(4点) -&gt; C7(5点) -&gt; C5(6点) -C8(7点)</span><br></pre></td></tr></table></figure>
+<p><img data-src="/2020/01/28/git/rebase%E5%92%8Cmerge%E7%9A%84%E5%8C%BA%E5%88%AB/a2.jpg"></p>
+<h3 id="使用git-rebase"><a href="#使用git-rebase" class="headerlink" title="使用git rebase"></a>使用git rebase</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1. 在dev分支上，执行`git rebase origin/master`，push到dev远程后，再去master分支，执行`git merge dev`</span><br><span class="line">2. 执行rebase时，git会找出master和dev的最近共同祖先commit点，即分叉点C2</span><br><span class="line">3. 然后将dev分支上，C2到最后一次commit(C5)之间的所有commit截取，移接到master的最后一次commit(C7)后面，但截取的这一段(C3~C5的commit的hash值会变成新的，也就是变成了C3&#x27;~C5&#x27;)</span><br><span class="line">4. dev rebase了 master后，就变成了C1 -&gt; C2 -&gt; C6 -&gt; C7 -&gt; C3&#x27; -&gt; C4&#x27; -&gt; C5&#x27;</span><br></pre></td></tr></table></figure>
+<p><img data-src="/2020/01/28/git/rebase%E5%92%8Cmerge%E7%9A%84%E5%8C%BA%E5%88%AB/a3.jpg"></p>
+<h3 id="merge和rebase的区别"><a href="#merge和rebase的区别" class="headerlink" title="merge和rebase的区别"></a>merge和rebase的区别</h3><p><img data-src="/2020/01/28/git/rebase%E5%92%8Cmerge%E7%9A%84%E5%8C%BA%E5%88%AB/a4.jpg"></p>
+<ul>
+<li><p><code>git merge</code> 操作合并分支会让两个分支的每一次提交都按照提交时间（并不是push时间）排序，并且会将两个分支的最新一次commit点进行合并成一个新的commit，最终的分支树呈现菱形</p>
+</li>
+<li><p><code>git rebase</code>操作实际上是将当前执行rebase分支的所有基于原分支提交点之后的commit打散成一个一个的patch，并重新生成一个新的commit hash值，再次基于原分支目前最新的commit点上进行提交，并不根据两个分支上实际的每次提交的时间点排序，rebase完成后，切到基分支进行合并另一个分支时也不会生成一个新的commit点，最终的分支树呈现线性</p>
+</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/01/20/vue/vue%E6%96%87%E6%A1%A3%E7%BA%AA%E8%A6%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/notion-avatar.svg">
+      <meta itemprop="name" content="Chao Tang">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="唐超的博客">
+      <meta itemprop="description" content="沉淀技术之路上的点点滴滴">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 唐超的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2020/01/20/vue/vue%E6%96%87%E6%A1%A3%E7%BA%AA%E8%A6%81/" class="post-title-link" itemprop="url">vue文档纪要</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-01-20 15:33:25" itemprop="dateCreated datePublished" datetime="2020-01-20T15:33:25+08:00">2020-01-20</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-02 12:31:29" itemprop="dateModified" datetime="2023-03-02T12:31:29+08:00">2023-03-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/vue/" itemprop="url" rel="index"><span itemprop="name">vue</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="计算属性和侦听器"><a href="#计算属性和侦听器" class="headerlink" title="计算属性和侦听器"></a>计算属性和侦听器</h1><h2 id="计算属性"><a href="#计算属性" class="headerlink" title="计算属性"></a>计算属性</h2><h3 id="计算属性的setter"><a href="#计算属性的setter" class="headerlink" title="计算属性的setter"></a>计算属性的setter</h3><p>计算属性默认只有 getter，不过在需要时你也可以提供一个 setter：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">computed</span>: &#123;</span><br><span class="line">  <span class="attr">fullName</span>: &#123;</span><br><span class="line">    <span class="comment">// getter</span></span><br><span class="line">    <span class="attr">get</span>: <span class="keyword">function</span> (<span class="params"></span>) &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="variable language_">this</span>.<span class="property">firstName</span> + <span class="string">&#x27; &#x27;</span> + <span class="variable language_">this</span>.<span class="property">lastName</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="comment">// setter</span></span><br><span class="line">    <span class="attr">set</span>: <span class="keyword">function</span> (<span class="params">newValue</span>) &#123;</span><br><span class="line">      <span class="keyword">var</span> names = newValue.<span class="title function_">split</span>(<span class="string">&#x27; &#x27;</span>)</span><br><span class="line">      <span class="variable language_">this</span>.<span class="property">firstName</span> = names[<span class="number">0</span>]</span><br><span class="line">      <span class="variable language_">this</span>.<span class="property">lastName</span> = names[names.<span class="property">length</span> - <span class="number">1</span>]</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>现在再运行 <code>vm.fullName = &#39;John Doe&#39;</code> 时，<code>setter</code> 会被调用，<code>vm.firstName</code> 和 <code>vm.lastName</code> 也会相应地被更新</p>
+<hr>
+<h1 id="列表渲染"><a href="#列表渲染" class="headerlink" title="列表渲染"></a>列表渲染</h1><h2 id="用v-for把一个数组对应为一组元素"><a href="#用v-for把一个数组对应为一组元素" class="headerlink" title="用v-for把一个数组对应为一组元素"></a>用v-for把一个数组对应为一组元素</h2><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable language_">this</span>.<span class="property">items</span> = [</span><br><span class="line">  &#123; <span class="attr">message</span>: <span class="string">&#x27;Foo&#x27;</span> &#125;,</span><br><span class="line">  &#123; <span class="attr">message</span>: <span class="string">&#x27;Bar&#x27;</span> &#125;</span><br><span class="line">];</span><br><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">li</span> <span class="attr">v-for</span>=<span class="string">&quot;(item, index) in items&quot;</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">  &#123;&#123; index &#125;&#125; - &#123;&#123; item.message &#125;&#125;</span></span><br><span class="line"><span class="language-xml"><span class="tag">&lt;/<span class="name">li</span>&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 渲染结果：</span></span><br><span class="line"><span class="comment">// 0 - Foo,</span></span><br><span class="line"><span class="comment">// 1 - Bar</span></span><br></pre></td></tr></table></figure>
+<h2 id="在v-for里使用对象"><a href="#在v-for里使用对象" class="headerlink" title="在v-for里使用对象"></a>在v-for里使用对象</h2><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable language_">this</span>.<span class="property">object</span> = &#123;</span><br><span class="line">  <span class="attr">title</span>: <span class="string">&#x27;How to do lists in Vue&#x27;</span>,</span><br><span class="line">  <span class="attr">author</span>: <span class="string">&#x27;Jane Doe&#x27;</span>,</span><br><span class="line">  <span class="attr">publishedAt</span>: <span class="string">&#x27;2016-04-10&#x27;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&lt;div v-<span class="keyword">for</span>=<span class="string">&quot;(value, name, index) in object&quot;</span>&gt;</span><br><span class="line">  &#123;&#123; index &#125;&#125;. &#123;&#123; name &#125;&#125;: &#123;&#123; value &#125;&#125;</span><br><span class="line">&lt;/div&gt;</span><br><span class="line"><span class="comment">// 渲染结果</span></span><br><span class="line"><span class="comment">// 1.title: &#x27;How to do lists in Vue&#x27;,</span></span><br><span class="line"><span class="comment">// 2.author: &#x27;Jane Doe&#x27;,</span></span><br><span class="line"><span class="comment">// 3.publishedAt: &#x27;2016-04-10&#x27;</span></span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="深入了解组件"><a href="#深入了解组件" class="headerlink" title="深入了解组件"></a>深入了解组件</h1><h2 id="组件注册"><a href="#组件注册" class="headerlink" title="组件注册"></a>组件注册</h2><h3 id="组件名大小写"><a href="#组件名大小写" class="headerlink" title="组件名大小写"></a>组件名大小写</h3><p>我们强烈推荐遵循 W3C 规范中的自定义组件名 (字母全小写且必须包含一个连字符)</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Vue</span>.<span class="title function_">component</span>(<span class="string">&#x27;my-component-name&#x27;</span>, &#123; <span class="comment">/* ... */</span> &#125;)</span><br></pre></td></tr></table></figure>
+<h2 id="自定义事件"><a href="#自定义事件" class="headerlink" title="自定义事件"></a>自定义事件</h2><h3 id="事件名"><a href="#事件名" class="headerlink" title="事件名"></a>事件名</h3><p>不同于组件和 prop，事件名不存在任何自动化的大小写转换。而是触发的事件名需要完全匹配监听这个事件所用的名称。举个例子，如果触发一个 camelCase 名字的事件：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 没有效果 </span></span><br><span class="line">&lt;my-component v-<span class="attr">on</span>:my-event=<span class="string">&quot;doSomething&quot;</span>&gt;&lt;/my-component&gt;</span><br><span class="line"><span class="variable language_">this</span>.$emit(<span class="string">&#x27;myEvent&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">blog-post</span> <span class="attr">post-title</span>=<span class="string">&quot;hello!&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">blog-post</span>&gt;</span></span></span><br><span class="line"><span class="attr">props</span>: [<span class="string">&#x27;postTitle&#x27;</span>],</span><br></pre></td></tr></table></figure>
+
+
+<hr>
+<h1 id="内在"><a href="#内在" class="headerlink" title="内在"></a>内在</h1><h2 id="深入响应式原理"><a href="#深入响应式原理" class="headerlink" title="深入响应式原理"></a>深入响应式原理</h2><h3 id="检测变化的注意事项"><a href="#检测变化的注意事项" class="headerlink" title="检测变化的注意事项"></a>检测变化的注意事项</h3><h4 id="对于对象"><a href="#对于对象" class="headerlink" title="对于对象"></a>对于对象</h4><p>响应式与非响应式：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> vm = <span class="keyword">new</span> <span class="title class_">Vue</span>(&#123;</span><br><span class="line">  <span class="attr">data</span>:&#123;</span><br><span class="line">    <span class="attr">a</span>:<span class="number">1</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment">// `vm.a` 是响应式的</span></span><br><span class="line"></span><br><span class="line">vm.<span class="property">b</span> = <span class="number">2</span></span><br><span class="line"><span class="comment">// `vm.b` 是非响应式的</span></span><br></pre></td></tr></table></figure>
+<p>给对象添加单个新属性：用<code>$set</code></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable language_">this</span>.$set(<span class="variable language_">this</span>.<span class="property">someObject</span>,<span class="string">&#x27;b&#x27;</span>,<span class="number">2</span>)</span><br></pre></td></tr></table></figure>
+<p>给对象添加多个新属性：直接Object.assign()不会触发响应，需要原对象与要混合进去的对象的 property 一起创建一个新的对象</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 代替 `Object.assign(this.someObject, &#123; a: 1, b: 2 &#125;)`</span></span><br><span class="line"><span class="variable language_">this</span>.<span class="property">someObject</span> = <span class="title class_">Object</span>.<span class="title function_">assign</span>(&#123;&#125;, <span class="variable language_">this</span>.<span class="property">someObject</span>, &#123; <span class="attr">a</span>: <span class="number">1</span>, <span class="attr">b</span>: <span class="number">2</span> &#125;)</span><br></pre></td></tr></table></figure>
+<h4 id="对于数组"><a href="#对于数组" class="headerlink" title="对于数组"></a>对于数组</h4><p>Vue 不能检测以下数组的变动：<br>1.当你利用索引直接设置一个数组项时，例如：<code>vm.items[indexOfItem] = newValue</code><br>2.当你修改数组的长度时，例如：<code>vm.items.length = newLength</code></p>
+<h2 id="但-set和数组的splice、shift等方法可以触发："><a href="#但-set和数组的splice、shift等方法可以触发：" class="headerlink" title="但$set和数组的splice、shift等方法可以触发："></a>但$set和数组的splice、shift等方法可以触发：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Vue</span>.<span class="title function_">set</span>(vm.<span class="property">items</span>, indexOfItem, newValue);</span><br><span class="line">vm.<span class="property">items</span>.<span class="title function_">splice</span>(indexOfItem, <span class="number">1</span>, newValue);</span><br></pre></td></tr></table></figure></h2><h3 id="异步更新队列"><a href="#异步更新队列" class="headerlink" title="异步更新队列"></a>异步更新队列</h3><p><code>nextTick</code>：将回调延迟到下次 DOM 更新循环之后执行，下面是理解<code>nextTick</code>的很好的例子：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> vm = <span class="keyword">new</span> <span class="title class_">Vue</span>(&#123;</span><br><span class="line">  <span class="attr">el</span>: <span class="string">&#x27;#example&#x27;</span>,</span><br><span class="line">  <span class="attr">data</span>: &#123;</span><br><span class="line">    <span class="attr">message</span>: <span class="string">&#x27;123&#x27;</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;)</span><br><span class="line">vm.<span class="property">message</span> = <span class="string">&#x27;new message&#x27;</span> <span class="comment">// 更改数据</span></span><br><span class="line">vm.<span class="property">$el</span>.<span class="property">textContent</span> === <span class="string">&#x27;new message&#x27;</span> <span class="comment">// false,因为dom未更新</span></span><br><span class="line"><span class="title class_">Vue</span>.<span class="title function_">nextTick</span>(<span class="keyword">function</span> (<span class="params"></span>) &#123;</span><br><span class="line">  vm.<span class="property">$el</span>.<span class="property">textContent</span> === <span class="string">&#x27;new message&#x27;</span> <span class="comment">// true，因为dom已更新</span></span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2019/11/21/http/cookie%E7%AF%87/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/notion-avatar.svg">
+      <meta itemprop="name" content="Chao Tang">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="唐超的博客">
+      <meta itemprop="description" content="沉淀技术之路上的点点滴滴">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 唐超的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2019/11/21/http/cookie%E7%AF%87/" class="post-title-link" itemprop="url">cookie篇</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-11-21 21:03:50" itemprop="dateCreated datePublished" datetime="2019-11-21T21:03:50+08:00">2019-11-21</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-02 12:31:29" itemprop="dateModified" datetime="2023-03-02T12:31:29+08:00">2023-03-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/http/" itemprop="url" rel="index"><span itemprop="name">http</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="什么是cookie"><a href="#什么是cookie" class="headerlink" title="什么是cookie?"></a>什么是cookie?</h2><ol>
+<li><p>第一次访问服务器的时候，会在<code>响应头</code>里面看到Set-Cookie信息（只有在首次访问服务器的时候才会在<code>响应头</code>中出现该信息）,如：<br>Set-Cookie:JSESSIONID&#x3D;joadjosd</p>
+</li>
+<li><p>浏览器会根据响应头的set-cookie信息设置浏览器的cookie并保存到浏览器本地</p>
+</li>
+<li><p>当再次请求的时候（非首次请求），浏览器会在请求头里将cookie发送给服务器(每次请求都是这样)，如：<br>将上面保存的 JSESSIONID&#x3D;joadjosd 发给服务器</p>
+</li>
+</ol>
+<h2 id="什么是JSESSIONID？"><a href="#什么是JSESSIONID？" class="headerlink" title="什么是JSESSIONID？"></a>什么是JSESSIONID？</h2><ol>
+<li><p>当用户访问服务器的时候，服务器会为每一个用户开启一个session,浏览器是怎么判断这个session到底是属于哪个用户呢？JSESSIONID的作用就体现出来了：JSESSIONID就是用来判断当前用户对应于哪个session，换句话说JSESSIONID会告诉服务器该浏览器的session保存在服务器内存的什么地方。</p>
+</li>
+<li><p>服务器首先检查这个浏览器的请求里是否已包含了一个session标识————称为session id，如果已包含则说明以前已经为此浏览器创建过session，服务器就按照session id把这个session检索出来使用（检索不到，会新建一个）；如果浏览器请求不包含session id，则为此浏览器创建一个session并且生成一个与此session相关联的session id，session id的值应该是一个既不会重复，又不容易被找到规律以仿造的字符串，这个session id将被在本次响应中返回给浏览器保存。</p>
+</li>
+<li><p>保存这个session id的方式可以采用cookie，这样浏览器在下次请求中，会把包含这个session id的cookie发送给服务器。</p>
+</li>
+<li><p>一般这个cookie的名字都是类似于SESSIONID，JSESSIONID只是tomcat的对session id的叫法，其实就是session id，在其它的容器也许就不叫JSESSIONID了。</p>
+</li>
+</ol>
+<h2 id="创建cookie"><a href="#创建cookie" class="headerlink" title="创建cookie"></a>创建cookie</h2><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">setCookie</span>(<span class="params">name,value,cookieDomain</span>) &#123;</span><br><span class="line">  <span class="variable language_">document</span>.<span class="property">cookie</span> = name + <span class="string">&#x27;=&#x27;</span>+ <span class="built_in">encodeURIComponent</span>(value) + <span class="string">&#x27;;domain=&#x27;</span> + cookieDomain + <span class="string">&#x27;;path=/&#x27;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="删除cookie"><a href="#删除cookie" class="headerlink" title="删除cookie"></a>删除cookie</h2><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 删除 cookie 非常简单。您只需要设置 expires 参数为以前的时间即可</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">delCookie</span>(<span class="params">name</span>) &#123;  </span><br><span class="line">  <span class="keyword">var</span> exp = <span class="keyword">new</span> <span class="title class_">Date</span>();</span><br><span class="line">  exp.<span class="title function_">setTime</span>(exp.<span class="title function_">getTime</span>() - <span class="number">1</span>);  </span><br><span class="line">  <span class="keyword">var</span> cookie = <span class="title function_">getCookie</span>(name);  </span><br><span class="line">  cookie &amp;&amp; (<span class="variable language_">document</span>.<span class="property">cookie</span> = name + <span class="string">&#x27;=&#x27;</span> + cookie + <span class="string">&#x27;;expires=&#x27;</span> + exp.<span class="title function_">toGMTString</span>()); </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="cookie属性"><a href="#cookie属性" class="headerlink" title="cookie属性"></a>cookie属性</h2><p>| 属性项 |	属性项介绍 |<br>|—<br>| NAME&#x3D;VALUE |	键值对，可以设置要保存的 Key&#x2F;Value，注意这里的 NAME 不能和其他属性项的名字一样<br>| Expires | 过期时间，在设置的某个时间点后该 Cookie 就会失效<br>| Domain	| 生成该 Cookie 的域名，如 domain&#x3D;”<a target="_blank" rel="noopener" href="http://www.baidu.com/">www.baidu.com</a>“<br>| Path	| 该 Cookie 是在当前的哪个路径下生成的，如 path&#x3D;&#x2F;wp-admin&#x2F;<br>| Secure	| 如果设置了这个属性，那么只会在 SSH 连接时才会回传该 Cookie</p>
+<h2 id="参考："><a href="#参考：" class="headerlink" title="参考："></a>参考：</h2><p>1.<a target="_blank" rel="noopener" href="https://blog.csdn.net/tanga842428/article/details/78600940">JSESSIONID的简单说明</a><br>2.<a target="_blank" rel="noopener" href="https://www.cnblogs.com/caiwenjing/p/8081391.html">cookie、session、sessionid 与jsessionid</a><br>3.<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/6fc9cea6daa2">深入理解Cookie</a><br>4.<a target="_blank" rel="noopener" href="https://www.runoob.com/js/js-cookies.html">javascript cookie</a></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
     <link itemprop="mainEntityOfPage" href="http://example.com/2019/10/12/%E5%89%8D%E7%AB%AF%E5%9F%BA%E7%A1%80/%E7%AE%97%E6%B3%95%E5%A5%BD%E6%96%87%E7%AB%A0/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -844,519 +1369,8 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2018/11/25/css/%E4%BD%A0%E6%83%B3%E7%9F%A5%E9%81%93%E7%9A%84BFC/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/notion-avatar.svg">
-      <meta itemprop="name" content="Chao Tang">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="唐超的博客">
-      <meta itemprop="description" content="沉淀技术之路上的点点滴滴">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 唐超的博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2018/11/25/css/%E4%BD%A0%E6%83%B3%E7%9F%A5%E9%81%93%E7%9A%84BFC/" class="post-title-link" itemprop="url">你想知道的BFC</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2018-11-25 10:33:06" itemprop="dateCreated datePublished" datetime="2018-11-25T10:33:06+08:00">2018-11-25</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-03-02 12:31:29" itemprop="dateModified" datetime="2023-03-02T12:31:29+08:00">2023-03-02</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/css/" itemprop="url" rel="index"><span itemprop="name">css</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2018/10/24/css/HTML%E8%84%B1%E7%A6%BB%E6%96%87%E6%A1%A3%E6%B5%81%E7%9A%84%E4%B8%89%E7%A7%8D%E6%96%B9%E6%B3%95/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/notion-avatar.svg">
-      <meta itemprop="name" content="Chao Tang">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="唐超的博客">
-      <meta itemprop="description" content="沉淀技术之路上的点点滴滴">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 唐超的博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2018/10/24/css/HTML%E8%84%B1%E7%A6%BB%E6%96%87%E6%A1%A3%E6%B5%81%E7%9A%84%E4%B8%89%E7%A7%8D%E6%96%B9%E6%B3%95/" class="post-title-link" itemprop="url">HTML脱离文档流的三种方法</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2018-10-24 08:13:07" itemprop="dateCreated datePublished" datetime="2018-10-24T08:13:07+08:00">2018-10-24</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-03-02 16:42:49" itemprop="dateModified" datetime="2023-03-02T16:42:49+08:00">2023-03-02</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/css/" itemprop="url" rel="index"><span itemprop="name">css</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="什么是文档流？"><a href="#什么是文档流？" class="headerlink" title="什么是文档流？"></a>什么是文档流？</h2><p>将窗体自上而下分成一行一行，并在每行中按从左至右依次排放元素，称为文档流，也称为普通流。</p>
-<p>这个应该不难理解，HTML中全部元素都是盒模型，盒模型占用一定的空间，依次排放在HTML中，形成了文档流。</p>
-<h2 id="什么是脱离文档流？"><a href="#什么是脱离文档流？" class="headerlink" title="什么是脱离文档流？"></a>什么是脱离文档流？</h2><p>元素脱离文档流之后，将不再在文档流中占据空间，而是处于浮动状态（可以理解为漂浮在文档流的上方）。脱离文档流的元素的定位基于正常的文档流，当一个元素脱离文档流后，依然在文档流中的其他元素将忽略该元素并填补其原先的空间。</p>
-<h2 id="怎么脱离文档流？"><a href="#怎么脱离文档流？" class="headerlink" title="怎么脱离文档流？"></a>怎么脱离文档流？</h2><h3 id="float"><a href="#float" class="headerlink" title="float"></a>float</h3><p>使用float可以脱离文档流。</p>
-<p>注意！！！：使用float脱离文档流时，其他盒子会无视这个元素，但其他盒子内的文本依然会为这个元素让出位置，环绕在该元素的周围。</p>
-<p>举个栗子：</p>
-<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">lang</span>=<span class="string">&quot;en&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">&quot;UTF-8&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>Title<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">style</span>&gt;</span><span class="language-css"></span></span><br><span class="line"><span class="language-css">        <span class="selector-class">.first</span> &#123;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">width</span>: <span class="number">200px</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">height</span>: <span class="number">200px</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">border</span>: <span class="number">3px</span> solid red;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">float</span>: left;</span></span><br><span class="line"><span class="language-css">        &#125;</span></span><br><span class="line"><span class="language-css">        <span class="selector-class">.second</span> &#123;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">width</span>: <span class="number">200px</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">height</span>: <span class="number">100px</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">border</span>: <span class="number">3px</span> solid blue;</span></span><br><span class="line"><span class="language-css">        &#125;</span></span><br><span class="line"><span class="language-css">    </span><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"> </span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"> </span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;first&quot;</span>&gt;</span>123<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;second&quot;</span>&gt;</span>456<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"> </span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>运行效果：</p>
-<p><img data-src="https://chao31.github.io/pics/img/202303021635021.png"></p>
-<p>这段代码中把红色的框设置为了左浮，所以红色的框称为了浮动状态（浮动在蓝色框的上面），而蓝色框占用了原来空色框的位置。注意到，蓝色框中的文本依然认为红色框存在，所以为红色框让出了位置。由于div是块状元素，所以456出现在下方。</p>
-<h3 id="absolute"><a href="#absolute" class="headerlink" title="absolute"></a>absolute</h3><p>absolute称为绝对定位，其实博主觉得应该称为相对定位，因为使用absolute脱离文档流后的元素，是相对于该元素的父类（及以上，如果直系父类元素不满足条件则继续向上查询）元素进行定位的，并且这个父类元素的position必须是非static定位的（static是默认定位方式）。</p>
-<p>举个栗子：</p>
-<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">lang</span>=<span class="string">&quot;en&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">&quot;UTF-8&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>Title<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">style</span>&gt;</span><span class="language-css"></span></span><br><span class="line"><span class="language-css">        <span class="selector-class">.first</span> &#123;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">width</span>: <span class="number">200px</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">height</span>: <span class="number">200px</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">border</span>: <span class="number">3px</span> solid red;</span></span><br><span class="line"><span class="language-css">        &#125;</span></span><br><span class="line"><span class="language-css">        <span class="selector-class">.second</span> &#123;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">width</span>: <span class="number">200px</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">height</span>: <span class="number">100px</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">border</span>: <span class="number">3px</span> solid blue;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">position</span>: absolute;</span></span><br><span class="line"><span class="language-css">        &#125;</span></span><br><span class="line"><span class="language-css">        <span class="selector-class">.third</span> &#123;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">width</span>: <span class="number">200px</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">height</span>: <span class="number">200px</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">border</span>: <span class="number">3px</span> solid green;</span></span><br><span class="line"><span class="language-css">        &#125;</span></span><br><span class="line"><span class="language-css">    </span><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"> </span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"> </span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;first&quot;</span>&gt;</span>123<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;second&quot;</span>&gt;</span>456<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;third&quot;</span>&gt;</span>789<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"> </span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p><img data-src="https://chao31.github.io/pics/img/202303021637717.png"></p>
-<p>通过把蓝色的框的position设置为absolute使蓝色的框变为浮动状态，可以看到绿色的框被蓝色的框遮挡。emmm…，看起来貌似没有问题，但是还记得前面说的absolute是相对谁定位的吗？相对非static元素的父级定位的，这里蓝框的父级就是html，所以应该是相对于html定位，但是代码中没有提供相对位置，所以只能浮动在原来该元素在文档流中的位置上方。</p>
-<p>下面加上相对位置并把html以dotted的形式显示出来：</p>
-<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">lang</span>=<span class="string">&quot;en&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">&quot;UTF-8&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>Title<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">style</span>&gt;</span><span class="language-css"></span></span><br><span class="line"><span class="language-css">        <span class="selector-class">.first</span> &#123;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">width</span>: <span class="number">200px</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">height</span>: <span class="number">200px</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">border</span>: <span class="number">3px</span> solid red;</span></span><br><span class="line"><span class="language-css">        &#125;</span></span><br><span class="line"><span class="language-css">        <span class="selector-class">.second</span> &#123;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">width</span>: <span class="number">200px</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">height</span>: <span class="number">100px</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">border</span>: <span class="number">3px</span> solid blue;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">position</span>: absolute;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">left</span>: <span class="number">0</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">top</span>: <span class="number">0</span>;</span></span><br><span class="line"><span class="language-css">        &#125;</span></span><br><span class="line"><span class="language-css">        <span class="selector-class">.third</span> &#123;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">width</span>: <span class="number">200px</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">height</span>: <span class="number">200px</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">border</span>: <span class="number">3px</span> solid green;</span></span><br><span class="line"><span class="language-css">        &#125;</span></span><br><span class="line"><span class="language-css">        <span class="selector-tag">html</span> &#123;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">border</span>: dotted;</span></span><br><span class="line"><span class="language-css">        &#125;</span></span><br><span class="line"><span class="language-css">    </span><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"> </span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"> </span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;first&quot;</span>&gt;</span>123<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;second&quot;</span>&gt;</span>456<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;third&quot;</span>&gt;</span>789<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"> </span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<p><img data-src="https://chao31.github.io/pics/img/202303021637487.png"></p>
-<p>结果很明显，蓝色的框遮住了html的点，所以当父级元素的position全是static的时候，absolute是相对于html来进行定位的。</p>
-<p>下面举个相对于父级元素定位的栗子：</p>
-<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">lang</span>=<span class="string">&quot;en&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">&quot;UTF-8&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>Title<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">style</span>&gt;</span><span class="language-css"></span></span><br><span class="line"><span class="language-css">        <span class="selector-class">.first</span> &#123;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">width</span>: <span class="number">200px</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">height</span>: <span class="number">200px</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">border</span>: <span class="number">3px</span> solid red;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">position</span>: relative;</span></span><br><span class="line"><span class="language-css">        &#125;</span></span><br><span class="line"><span class="language-css">        <span class="selector-class">.second</span> &#123;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">width</span>: <span class="number">200px</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">height</span>: <span class="number">100px</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">border</span>: <span class="number">3px</span> solid blue;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">position</span>: absolute;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">left</span>: <span class="number">0</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">top</span>: <span class="number">0</span>;</span></span><br><span class="line"><span class="language-css">        &#125;</span></span><br><span class="line"><span class="language-css">        <span class="selector-class">.third</span> &#123;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">width</span>: <span class="number">200px</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">height</span>: <span class="number">200px</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">border</span>: <span class="number">3px</span> solid green;</span></span><br><span class="line"><span class="language-css">        &#125;</span></span><br><span class="line"><span class="language-css">        <span class="selector-tag">html</span> &#123;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">border</span>: dotted;</span></span><br><span class="line"><span class="language-css">        &#125;</span></span><br><span class="line"><span class="language-css">    </span><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"> </span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"> </span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;first&quot;</span>&gt;</span></span><br><span class="line">    123</span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;second&quot;</span>&gt;</span></span><br><span class="line">        456</span><br><span class="line">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;third&quot;</span>&gt;</span></span><br><span class="line">    789</span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"> </span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<p><img data-src="https://chao31.github.io/pics/img/202303021638347.png"></p>
-<p>嗯，没问题，蓝色的框是相对红色的框进行定位的，具体来说是相对于border。（可以试一下改变红色框的margin和paddind看看会发生什么）。</p>
-<p>注意：绝对定位的窗口一般都要设置相对距离，当你同时设置top和bottom的时候，只有top会生效，同理，同时设置left和right的时候，只有left会生效。</p>
-<h3 id="fixed"><a href="#fixed" class="headerlink" title="fixed"></a>fixed</h3><p>完全脱离文档流，相对于浏览器窗口进行定位。（相对于浏览器窗口就是相对于html）。</p>
-<p> 举个栗子：</p>
- <figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"> <span class="meta">&lt;!DOCTYPE <span class="keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">lang</span>=<span class="string">&quot;en&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">&quot;UTF-8&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>Title<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">style</span>&gt;</span><span class="language-css"></span></span><br><span class="line"><span class="language-css">        <span class="selector-class">.first</span> &#123;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">width</span>: <span class="number">200px</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">height</span>: <span class="number">200px</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">border</span>: <span class="number">3px</span> solid red;</span></span><br><span class="line"><span class="language-css">        &#125;</span></span><br><span class="line"><span class="language-css">        <span class="selector-class">.second</span> &#123;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">width</span>: <span class="number">200px</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">height</span>: <span class="number">100px</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">border</span>: <span class="number">3px</span> solid blue;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">position</span>: fixed;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">right</span>: <span class="number">0</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">top</span>: <span class="number">0</span>;</span></span><br><span class="line"><span class="language-css">        &#125;</span></span><br><span class="line"><span class="language-css">        <span class="selector-class">.third</span> &#123;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">width</span>: <span class="number">200px</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">height</span>: <span class="number">200px</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">border</span>: <span class="number">3px</span> solid green;</span></span><br><span class="line"><span class="language-css">        &#125;</span></span><br><span class="line"><span class="language-css">        <span class="selector-tag">html</span> &#123;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">border</span>: dotted;</span></span><br><span class="line"><span class="language-css">        &#125;</span></span><br><span class="line"><span class="language-css">    </span><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"> </span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"> </span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;first&quot;</span>&gt;</span>123<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;second&quot;</span>&gt;</span>456<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;third&quot;</span>&gt;</span>789<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"> </span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p><img data-src="https://chao31.github.io/pics/img/202303021638883.png"></p>
-<p>可以很明显的看出，蓝色的框是相对于html进行定位的。当然，如果不提供相对位置的话，蓝色的框会浮动在其原先在文档流中的位置上方。</p>
-<p>Note：文档流是在body中的，body在html中，这个在代码结构中也体现出来了，下面的例子可以更直观的看出：</p>
-<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">lang</span>=<span class="string">&quot;en&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">&quot;UTF-8&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>Title<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">style</span>&gt;</span><span class="language-css"></span></span><br><span class="line"><span class="language-css">        <span class="selector-class">.first</span> &#123;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">width</span>: <span class="number">200px</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">height</span>: <span class="number">200px</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">border</span>: <span class="number">3px</span> solid red;</span></span><br><span class="line"><span class="language-css">        &#125;</span></span><br><span class="line"><span class="language-css">        <span class="selector-class">.second</span> &#123;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">width</span>: <span class="number">200px</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">height</span>: <span class="number">100px</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">border</span>: <span class="number">3px</span> solid blue;</span></span><br><span class="line"><span class="language-css">        &#125;</span></span><br><span class="line"><span class="language-css">        <span class="selector-class">.third</span> &#123;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">width</span>: <span class="number">200px</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">height</span>: <span class="number">200px</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">border</span>: <span class="number">3px</span> solid green;</span></span><br><span class="line"><span class="language-css">        &#125;</span></span><br><span class="line"><span class="language-css">        <span class="selector-tag">body</span> &#123;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">border</span>: dotted red;</span></span><br><span class="line"><span class="language-css">        &#125;</span></span><br><span class="line"><span class="language-css">        <span class="selector-tag">html</span> &#123;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">border</span>: double black;</span></span><br><span class="line"><span class="language-css">        &#125;</span></span><br><span class="line"><span class="language-css">    </span><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"> </span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"> </span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;first&quot;</span>&gt;</span>123<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;second&quot;</span>&gt;</span>456<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;third&quot;</span>&gt;</span>789<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"> </span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p><img data-src="https://chao31.github.io/pics/img/202303021639461.png"></p>
-<h3 id="relative"><a href="#relative" class="headerlink" title="relative"></a>relative</h3><p>最后说一个半脱离文档流的方法，就是position：relative。下面说明一下为什么是半脱离文档流。</p>
-<p>先看下面这段代码</p>
-<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">lang</span>=<span class="string">&quot;en&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">&quot;UTF-8&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>Title<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">style</span>&gt;</span><span class="language-css"></span></span><br><span class="line"><span class="language-css">        <span class="selector-class">.first</span> &#123;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">width</span>: <span class="number">200px</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">height</span>: <span class="number">200px</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">border</span>: <span class="number">3px</span> solid red;</span></span><br><span class="line"><span class="language-css">        &#125;</span></span><br><span class="line"><span class="language-css">        <span class="selector-class">.second</span> &#123;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">width</span>: <span class="number">200px</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">height</span>: <span class="number">100px</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">border</span>: <span class="number">3px</span> solid blue;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">position</span>: relative;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">top</span>: <span class="number">100px</span>;</span></span><br><span class="line"><span class="language-css">        &#125;</span></span><br><span class="line"><span class="language-css">        <span class="selector-class">.third</span> &#123;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">width</span>: <span class="number">200px</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">height</span>: <span class="number">200px</span>;</span></span><br><span class="line"><span class="language-css">            <span class="attribute">border</span>: <span class="number">3px</span> solid green;</span></span><br><span class="line"><span class="language-css">        &#125;</span></span><br><span class="line"><span class="language-css">    </span><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"> </span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"> </span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;first&quot;</span>&gt;</span>123<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;second&quot;</span>&gt;</span>456<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;third&quot;</span>&gt;</span>789<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"> </span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p><img data-src="https://chao31.github.io/pics/img/202303021639292.png"></p>
-<p>可以看到，蓝色的框是浮动了，但是绿色的框却相对于蓝色的框原先在文档流中的位置进行了定位。这就是所谓的半脱离文档流，本体还在文档流中占有位置，但是却可以通过改变位置使其漂浮到其他的地方，其定位方式是相对其原先在文档流中的位置进行定位的。</p>
-<p>注意：可以尝试改变蓝色框的margin和padding属性，看一下会发生什么。</p>
-<p>关键就是知道蓝色框在原来的文档流占用位置，相对定位后还是在原来的位置占据文档流。（类似实体投影到另一个地方）。</p>
-<p>以上就是脱离文档流的方法。</p>
-<p>最后再多说一句，一般设置relative是为了让absolute有个相对定位的参照。</p>
-<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/thelostlamb/article/details/79581984">转载自</a></p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2018/06/16/%E5%89%8D%E7%AB%AF%E6%B7%B1%E5%85%A5/call-apply-bind%E7%9A%84%E5%BA%95%E5%B1%82%E5%AE%9E%E7%8E%B0/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/notion-avatar.svg">
-      <meta itemprop="name" content="Chao Tang">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="唐超的博客">
-      <meta itemprop="description" content="沉淀技术之路上的点点滴滴">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 唐超的博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2018/06/16/%E5%89%8D%E7%AB%AF%E6%B7%B1%E5%85%A5/call-apply-bind%E7%9A%84%E5%BA%95%E5%B1%82%E5%AE%9E%E7%8E%B0/" class="post-title-link" itemprop="url">JavaScript深入——call、apply和bind的底层实现</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2018-06-16 14:15:31" itemprop="dateCreated datePublished" datetime="2018-06-16T14:15:31+08:00">2018-06-16</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-03-02 12:31:29" itemprop="dateModified" datetime="2023-03-02T12:31:29+08:00">2023-03-02</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%89%8D%E7%AB%AF%E6%B7%B1%E5%85%A5/" itemprop="url" rel="index"><span itemprop="name">前端深入</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h3 id="call、apply和bind的区别"><a href="#call、apply和bind的区别" class="headerlink" title="call、apply和bind的区别"></a>call、apply和bind的区别</h3><ol>
-<li>三者都是this的绑定，第一个参数都需要传入要绑定的this</li>
-<li>call和apply的区别是后面的参数，call是一个一个传入，而apply是通过一个数组传入</li>
-<li>bind会返回一个函数，在需要的地方执行该函数；而call、apply会立即执行</li>
-</ol>
-<h3 id="call的Polyfill"><a href="#call的Polyfill" class="headerlink" title="call的Polyfill"></a>call的Polyfill</h3><p>函数都可以调用 call，说明 call 是函数原型上的方法，所有的实例都可以调用。即: <code>Function.prototype.call</code></p>
-<p>call的实现需要注意以下几点：</p>
-<ol>
-<li>在 call 方法中获取调用call()函数</li>
-<li>第一个参数可以不传或传null，此时this默认指向 window</li>
-<li>从第二个参数起，可以向call传入不定长的参数</li>
-<li>传入 call 的第一个参数是 this 指向的对象，根据隐式绑定的规则，我们知道 obj.foo(), foo() 中的 this 指向 obj;因此我们可以这样调用函数 context.fn(…args),即在上下文对象添加要执行的fn</li>
-<li>执行完毕，delete添加的fn属性</li>
-</ol>
-<p>Polyfill:</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Function</span>.<span class="property"><span class="keyword">prototype</span></span>.<span class="property">call2</span> = <span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="comment">// 初始化绑定的this对象(context)和参数args</span></span><br><span class="line">    <span class="keyword">let</span> [context, ...args] = [...<span class="variable language_">arguments</span>];</span><br><span class="line">    <span class="comment">// args没传或传null，绑定window</span></span><br><span class="line">    !context &amp;&amp; (context = <span class="variable language_">window</span>);</span><br><span class="line">    <span class="comment">// 将要执行的函数，绑定到context的fn属性上</span></span><br><span class="line">    context.<span class="property">fn</span> = <span class="variable language_">this</span>;</span><br><span class="line">    <span class="comment">// 执行fn</span></span><br><span class="line">    <span class="keyword">let</span> result = context.<span class="title function_">fn</span>(...args); </span><br><span class="line">    <span class="comment">// 删除多余添加的属性</span></span><br><span class="line">    <span class="keyword">delete</span> context.<span class="property">fn</span>;</span><br><span class="line">    <span class="comment">// 返回结果</span></span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>测试一下：</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 测试一下</span></span><br><span class="line"><span class="keyword">var</span> foo = &#123;</span><br><span class="line">    <span class="attr">value</span>: <span class="number">1</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">bar</span>(<span class="params">name, age</span>) &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(name)</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(age)</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="variable language_">this</span>.<span class="property">value</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">bar.<span class="title function_">call2</span>(foo, <span class="string">&#x27;kevin&#x27;</span>, <span class="number">18</span>);</span><br><span class="line"><span class="comment">// kevin</span></span><br><span class="line"><span class="comment">// 18</span></span><br><span class="line"><span class="comment">// 1</span></span><br></pre></td></tr></table></figure>
-<p>bind2的测试没问题了，就可以把它放进prototype.bind，Polyfill的写法：</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (!<span class="title class_">Function</span>.<span class="property"><span class="keyword">prototype</span></span>.<span class="property">bind</span>)</span><br><span class="line">(<span class="keyword">function</span>(<span class="params"></span>)&#123;</span><br><span class="line">  <span class="title class_">Function</span>.<span class="property"><span class="keyword">prototype</span></span>.<span class="property">bind</span> = <span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">    ...</span><br><span class="line">  &#125;</span><br><span class="line">&#125;)();</span><br></pre></td></tr></table></figure>
-<h3 id="apply的Polyfill"><a href="#apply的Polyfill" class="headerlink" title="apply的Polyfill"></a>apply的Polyfill</h3><p>apply与call的实现，只有取参数的方式不同</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Function</span>.<span class="property"><span class="keyword">prototype</span></span>.<span class="property">apply2</span> = <span class="keyword">function</span>(<span class="params">context, args</span>) &#123;</span><br><span class="line">    </span><br><span class="line">    !context &amp;&amp; (context = <span class="variable language_">window</span>);</span><br><span class="line">    context.<span class="property">fn</span> = <span class="variable language_">this</span>;</span><br><span class="line">    <span class="keyword">let</span> result = args ? context.<span class="title function_">fn</span>(...args) : context.<span class="title function_">fn</span>(); </span><br><span class="line">    <span class="keyword">delete</span> context.<span class="property">fn</span>;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>测试一下：</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 测试一下</span></span><br><span class="line"><span class="keyword">var</span> foo = &#123;</span><br><span class="line">    <span class="attr">value</span>: <span class="number">1</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">bar</span>(<span class="params">name, age</span>) &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(name)</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(age)</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="variable language_">this</span>.<span class="property">value</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">bar.<span class="title function_">apply2</span>(foo, [<span class="string">&#x27;kevin&#x27;</span>, <span class="number">18</span>]); </span><br><span class="line"><span class="comment">// kevin</span></span><br><span class="line"><span class="comment">// 18</span></span><br><span class="line"><span class="comment">// 1</span></span><br></pre></td></tr></table></figure>
-<h3 id="bind的Polyfill"><a href="#bind的Polyfill" class="headerlink" title="bind的Polyfill"></a>bind的Polyfill</h3><p>bind和call的区别就是，返回一个函数，在这个函数里执行fn</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Function</span>.<span class="property"><span class="keyword">prototype</span></span>.<span class="property">bind2</span> = <span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">let</span> [context, ...args] = [...<span class="variable language_">arguments</span>];</span><br><span class="line">    !context &amp;&amp; (context = <span class="variable language_">window</span>);</span><br><span class="line">    context.<span class="property">fn</span> = <span class="variable language_">this</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">function</span>(<span class="params"></span>) &#123;  </span><br><span class="line">        <span class="keyword">let</span> result = context.<span class="title function_">fn</span>(...args); </span><br><span class="line">        <span class="keyword">delete</span> context.<span class="property">fn</span>;</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>测试一下：</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 测试一下</span></span><br><span class="line"><span class="keyword">var</span> foo = &#123;</span><br><span class="line">    <span class="attr">value</span>: <span class="number">1</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">bar</span>(<span class="params">name, age</span>) &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(name)</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(age)</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="variable language_">this</span>.<span class="property">value</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> func = bar.<span class="title function_">bind2</span>(foo, <span class="string">&#x27;kevin&#x27;</span>, <span class="number">18</span>); </span><br><span class="line"><span class="title function_">func</span>();</span><br><span class="line"><span class="comment">// kevin</span></span><br><span class="line"><span class="comment">// 18</span></span><br><span class="line"><span class="comment">// 1</span></span><br></pre></td></tr></table></figure>
-
-<p><a target="_blank" rel="noopener" href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Function/bind">也可以参考MDN的Polyfill</a></p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2018/06/13/git/git%E7%9A%84reset%E5%8C%BA%E5%88%AB/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/notion-avatar.svg">
-      <meta itemprop="name" content="Chao Tang">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="唐超的博客">
-      <meta itemprop="description" content="沉淀技术之路上的点点滴滴">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 唐超的博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2018/06/13/git/git%E7%9A%84reset%E5%8C%BA%E5%88%AB/" class="post-title-link" itemprop="url">git reset、--soft、--hard的区别</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2018-06-13 20:15:49" itemprop="dateCreated datePublished" datetime="2018-06-13T20:15:49+08:00">2018-06-13</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-03-02 12:31:29" itemprop="dateModified" datetime="2023-03-02T12:31:29+08:00">2023-03-02</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/git/" itemprop="url" rel="index"><span itemprop="name">git</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git reset [--soft | --mixed | --hard] </span><br></pre></td></tr></table></figure>
-<p>为了简单，不用工作区和暂存区描述，用红色文件和绿色文件描述</p>
-<h3 id="git-reset"><a href="#git-reset" class="headerlink" title="git reset"></a>git reset</h3><p><code>git reset</code> 不加参数，默认是–mixed </p>
-<p>git会回到指定的commit，并将两个commit之间的所有diff保留下来（红色文件）</p>
-<p>利用这个特性，在合master前，feature分支的commit太多，希望合成一个</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 回到最初的commit</span></span><br><span class="line">git reset xxxxx</span><br><span class="line"><span class="comment">// 重新提一个commit</span></span><br><span class="line">git add -A</span><br><span class="line">git commit -m <span class="string">&#x27;新功能xxx&#x27;</span></span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>☑️ Squash commits when merge request is accepted.<br>其实提MR时，勾选这个，就能合并所有的commit</p>
-</blockquote>
-<h3 id="git-reset-–hard"><a href="#git-reset-–hard" class="headerlink" title="git reset –hard"></a>git reset –hard</h3><p>git 会回到指定的commit，但两个commit之间的所有diff都被删除，干干净净的回到指定commit（如果执行这个命令之前就有被修改的红色文件，执行之后也会被删除）</p>
-<h3 id="git-reset-–soft"><a href="#git-reset-–soft" class="headerlink" title="git reset –soft"></a>git reset –soft</h3><p>git会回到指定的commit，并将两个commit之间的所有diff保留下来，但不会变成红色文件，而是变成绿色文件（执行命令之前的红色文件修改，依然保留下来为红色）</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2018/06/07/%E7%AE%97%E6%B3%95/%E4%BA%8C%E5%88%86%E6%9F%A5%E6%89%BE/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/notion-avatar.svg">
-      <meta itemprop="name" content="Chao Tang">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="唐超的博客">
-      <meta itemprop="description" content="沉淀技术之路上的点点滴滴">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 唐超的博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2018/06/07/%E7%AE%97%E6%B3%95/%E4%BA%8C%E5%88%86%E6%9F%A5%E6%89%BE/" class="post-title-link" itemprop="url">二分查找</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2018-06-07 08:00:59" itemprop="dateCreated datePublished" datetime="2018-06-07T08:00:59+08:00">2018-06-07</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-03-02 12:31:29" itemprop="dateModified" datetime="2023-03-02T12:31:29+08:00">2023-03-02</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">算法</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>二分查找的前提为：数组、有序。</p>
-<p>逻辑为：优先和数组的中间元素比较，如果等于中间元素，则直接返回。如果不等于则取半继续查找。</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title function_">binarySearch</span> = (<span class="params">arr, target</span>) =&gt; &#123;</span><br><span class="line">  <span class="keyword">let</span> left = <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">let</span> right = arr.<span class="property">length</span> - <span class="number">1</span>;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">while</span>(left &lt;= right) &#123;</span><br><span class="line">    <span class="keyword">let</span> middle = <span class="title class_">Math</span>.<span class="title function_">floor</span>((left + right) / <span class="number">2</span>);</span><br><span class="line">    <span class="keyword">if</span>(target === arr[middle]) <span class="keyword">return</span> middle;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(target &gt; arr[middle]) &#123;</span><br><span class="line">      left = middle;</span><br><span class="line">    &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">      right = middle;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> arr = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">13</span>, <span class="number">14</span>, <span class="number">15</span>, <span class="number">16</span>, <span class="number">17</span>, <span class="number">18</span>, <span class="number">19</span>, <span class="number">20</span>]</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="title function_">binarySearch</span>(arr, <span class="number">10</span>))  <span class="comment">// 9</span></span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/default_index/page/3/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/default_index/">1</a><span class="space">&hellip;</span><a class="page-number" href="/default_index/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/default_index/page/5/">5</a><a class="extend next" rel="next" href="/default_index/page/5/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <a class="extend prev" rel="prev" href="/default_index/page/3/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/default_index/">1</a><span class="space">&hellip;</span><a class="page-number" href="/default_index/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/default_index/page/5/">5</a><a class="page-number" href="/default_index/page/6/">6</a><a class="extend next" rel="next" href="/default_index/page/5/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 </div>

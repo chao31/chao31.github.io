@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#C3B0D6"><meta name="generator" content="Hexo 6.3.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.svg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.svg">
+  <link rel="mask-icon" href="/favicon.svg" color="#C3B0D6">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css" integrity="sha256-DfWjNxDkM94fVBWx1H5BMMp0Zq7luBlV8QRcSES7s+0=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.11.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":null,"post_body":null,"coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="截止到目前，我们的 react 已经可以完成首次渲染，但还不能响应式更新和删除，下面我们来实现一下。 保存 old fiber1234567891011121314151617181920212223242526272829&#x2F;&#x2F; ...function render(element, container) &amp;#123;  &#x2F;&#x2F; 虽然后面会给这个对象添加更多属性，但这里是第一个 fiber  wip">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从 0 到 1 实现 React（三）实现 diff">
+<meta property="og:url" content="http://example.com/2022/02/15/react/%E4%BB%8E0%E5%88%B01%E5%AE%9E%E7%8E%B0React3/index.html">
+<meta property="og:site_name" content="唐超的博客">
+<meta property="og:description" content="截止到目前，我们的 react 已经可以完成首次渲染，但还不能响应式更新和删除，下面我们来实现一下。 保存 old fiber1234567891011121314151617181920212223242526272829&#x2F;&#x2F; ...function render(element, container) &amp;#123;  &#x2F;&#x2F; 虽然后面会给这个对象添加更多属性，但这里是第一个 fiber  wip">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-02-15T00:00:59.000Z">
+<meta property="article:modified_time" content="2023-04-06T07:59:56.663Z">
+<meta property="article:author" content="Chao Tang">
+<meta property="article:tag" content="react">
+<meta property="article:tag" content="从 0 到 1 系列">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2022/02/15/react/%E4%BB%8E0%E5%88%B01%E5%AE%9E%E7%8E%B0React3/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://example.com/2022/02/15/react/%E4%BB%8E0%E5%88%B01%E5%AE%9E%E7%8E%B0React3/","path":"2022/02/15/react/从0到1实现React3/","title":"从 0 到 1 实现 React（三）实现 diff"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>从 0 到 1 实现 React（三）实现 diff | 唐超的博客</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">唐超的博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">绘制我的前端技术图谱</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%9D%E5%AD%98-old-fiber"><span class="nav-text">保存 old fiber</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8F%90%E5%8F%96-diff-%E9%83%A8%E5%88%86%E5%B9%B6%E8%BF%9B%E8%A1%8C%E5%B0%81%E8%A3%85"><span class="nav-text">提取 diff 部分并进行封装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#diff"><span class="nav-text">diff</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9%E6%AF%94%E7%9A%84%E7%AD%96%E7%95%A5"><span class="nav-text">对比的策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9%E6%AF%94%E6%97%A7-fiber%EF%BC%8C%E5%88%9B%E5%BB%BA%E6%96%B0-fiber"><span class="nav-text">对比旧 fiber，创建新 fiber</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%84%E7%90%86-deletions-%E6%95%B0%E7%BB%84"><span class="nav-text">处理 deletions 数组</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#commitWork"><span class="nav-text">commitWork</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#updateDom"><span class="nav-text">updateDom</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Chao Tang"
+      src="/images/notion-avatar.svg">
+  <p class="site-author-name" itemprop="name">Chao Tang</p>
+  <div class="site-description" itemprop="description">沉淀技术之路上的点点滴滴</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/chao31" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;chao31" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:cucfortc@163.com" title="E-Mail → mailto:cucfortc@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://juejin.cn/user/2488950055501998/posts" title="稀土掘金 → https:&#x2F;&#x2F;juejin.cn&#x2F;user&#x2F;2488950055501998&#x2F;posts" rel="noopener" target="_blank"><i class="fa-brands fa-buffer fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://chao31.github.io/FE-QA/" title="FE-QA → https:&#x2F;&#x2F;chao31.github.io&#x2F;FE-QA&#x2F;" rel="noopener" target="_blank"><i class="fa-brands fa-teamspeak fa-fw"></i></a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll site-overview-item animated">
+    <div class="links-of-blogroll-title"><i class="fa-solid fa-earth-asia fa-fw"></i>
+      友链
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://www.30secondsofcode.org/" title="https:&#x2F;&#x2F;www.30secondsofcode.org&#x2F;" rel="noopener" target="_blank">30-Seconds-Of-Code</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://react.iamkasong.com/" title="https:&#x2F;&#x2F;react.iamkasong.com&#x2F;" rel="noopener" target="_blank">React 技术揭秘</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chao31.github.io/myLetcode/" title="https:&#x2F;&#x2F;chao31.github.io&#x2F;myLetcode&#x2F;" rel="noopener" target="_blank">myLetcode</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://interview2.poetries.top/" title="https:&#x2F;&#x2F;interview2.poetries.top&#x2F;" rel="noopener" target="_blank">FE-Interview-Questions</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://github.com/helloqingfeng/Awsome-Front-End-learning-resource" title="https:&#x2F;&#x2F;github.com&#x2F;helloqingfeng&#x2F;Awsome-Front-End-learning-resource" rel="noopener" target="_blank">Awsome-Front</a>
+        </li>
+    </ul>
+  </div>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/chao31" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/02/15/react/%E4%BB%8E0%E5%88%B01%E5%AE%9E%E7%8E%B0React3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/notion-avatar.svg">
+      <meta itemprop="name" content="Chao Tang">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="唐超的博客">
+      <meta itemprop="description" content="沉淀技术之路上的点点滴滴">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="从 0 到 1 实现 React（三）实现 diff | 唐超的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          从 0 到 1 实现 React（三）实现 diff
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-02-15 08:00:59" itemprop="dateCreated datePublished" datetime="2022-02-15T08:00:59+08:00">2022-02-15</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-04-06 15:59:56" itemprop="dateModified" datetime="2023-04-06T15:59:56+08:00">2023-04-06</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/react/" itemprop="url" rel="index"><span itemprop="name">react</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>截止到目前，我们的 react 已经可以完成首次渲染，但还不能响应式更新和删除，下面我们来实现一下。</p>
+<h2 id="保存-old-fiber"><a href="#保存-old-fiber" class="headerlink" title="保存 old fiber"></a>保存 old fiber</h2><figure class="highlight diff"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">// ...</span><br><span class="line"></span><br><span class="line">function render(element, container) &#123;</span><br><span class="line">  // 虽然后面会给这个对象添加更多属性，但这里是第一个 fiber</span><br><span class="line">  wipRoot = &#123;</span><br><span class="line">    dom: container,</span><br><span class="line">    props: &#123;</span><br><span class="line">      children: [element],</span><br><span class="line">    &#125;,</span><br><span class="line"><span class="addition">+   alternate: currentRoot,</span></span><br><span class="line">  &#125;</span><br><span class="line">  nextUnitOfWork = wipRoot</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"> function commitRoot() &#123;</span><br><span class="line">   commitWork(wipRoot.child)</span><br><span class="line"><span class="addition">+  // commit 后，新 fiber 就变成了旧 fiber，更新一下旧 fiber</span></span><br><span class="line"><span class="addition">+  currentRoot = wipRoot</span></span><br><span class="line">   wipRoot = null</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line">// ...</span><br><span class="line"></span><br><span class="line">let nextUnitOfWork = null</span><br><span class="line"><span class="addition">+ // 当有新 fiber root 后，会拿它跟当前 root fiber 做对比，所以需要缓存当前 root fiber</span></span><br><span class="line"><span class="addition">+ let currentRoot = null</span></span><br><span class="line">let wipRoot = null</span><br><span class="line"></span><br><span class="line">//...</span><br></pre></td></tr></table></figure>
+<ul>
+<li>缓存当前的<code>root fiber</code>，以便有了新的<code>root fiber</code>后可以进行<code>diff</code></li>
+<li>给每一个 fiber 都新增一个<code>alternate</code>属性，用于存放旧 fiber</li>
+</ul>
+<h2 id="提取-diff-部分并进行封装"><a href="#提取-diff-部分并进行封装" class="headerlink" title="提取 diff 部分并进行封装"></a>提取 diff 部分并进行封装</h2><p>之前我们处理 diff 部分是在<code>performUnitOfWork</code>方法里，现在将其提出来，封装到新方法<code>reconcileChildren</code>里</p>
+<figure class="highlight diff"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">function performUnitOfWork(fiber) &#123;</span><br><span class="line">  if (!fiber.dom) &#123;</span><br><span class="line">    fiber.dom = createDom(fiber)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  const elements = fiber.props.children</span><br><span class="line"></span><br><span class="line"><span class="addition">+  reconcileChildren(fiber, elements)</span></span><br><span class="line"></span><br><span class="line"><span class="deletion">-    let index = 0</span></span><br><span class="line"><span class="deletion">-    let prevSibling = null</span></span><br><span class="line"></span><br><span class="line"><span class="deletion">-    // 1. 遍历当前fiber的children</span></span><br><span class="line"><span class="deletion">-    // 2. 给children里的每个child指定3个指针，分别指向其 父、子、兄弟三个节点</span></span><br><span class="line"><span class="deletion">-    while (index &lt; elements.length) &#123;</span></span><br><span class="line"><span class="deletion">-      const element = elements[index]</span></span><br><span class="line"></span><br><span class="line"><span class="deletion">-      const newFiber = &#123;</span></span><br><span class="line"><span class="deletion">-        type: element.type,</span></span><br><span class="line"><span class="deletion">-        props: element.props,</span></span><br><span class="line"><span class="deletion">-        parent: fiber,</span></span><br><span class="line"><span class="deletion">-        dom: null,</span></span><br><span class="line"><span class="deletion">-      &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="deletion">-      if (index === 0) &#123;</span></span><br><span class="line"><span class="deletion">-        fiber.child = newFiber</span></span><br><span class="line"><span class="deletion">-      &#125; else &#123;</span></span><br><span class="line"><span class="deletion">-        prevSibling.sibling = newFiber</span></span><br><span class="line"><span class="deletion">-      &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="deletion">-      prevSibling = newFiber</span></span><br><span class="line"><span class="deletion">-      index++</span></span><br><span class="line"><span class="deletion">-    &#125;</span></span><br><span class="line"></span><br><span class="line">  // 下面的操作是返回下一个单元——nextUnitOfWork</span><br><span class="line">  // 1. 优先找child</span><br><span class="line">  // 2. 没有child找兄弟</span><br><span class="line">  // 3. 没有兄弟，找叔叔，也就是递归到父元素的兄弟</span><br><span class="line">  // 4. 没有叔叔就一直往上递归...</span><br><span class="line">  if (fiber.child) &#123;</span><br><span class="line">    return fiber.child</span><br><span class="line">  &#125;</span><br><span class="line">  // ...</span><br><span class="line">&#125;</span><br><span class="line">  </span><br><span class="line"><span class="addition">+ function reconcileChildren(wipFiber, elements) &#123;</span></span><br><span class="line"><span class="addition">+     let index = 0</span></span><br><span class="line"><span class="addition">+     let prevSibling = null</span></span><br><span class="line"><span class="addition">+     ...</span></span><br><span class="line"><span class="addition">+ &#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>在 <code>reconcileChildren</code> 方法中，把 <code>new fiber</code> 和 <code>old fiber</code> 表示出来 (便于 TODO 部分进行对比)，并将<code>old fiber</code>的变化也加入到<code>while</code>迭代中来</p>
+<figure class="highlight diff"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">function reconcileChildren(wipFiber, elements) &#123;</span><br><span class="line">  let index = 0</span><br><span class="line"><span class="addition">+ // 从 alternate 找到旧父fiber的第一个child，作为第一个要对比的old fiber</span></span><br><span class="line"><span class="addition">+ let oldFiber = wipFiber.alternate &amp;&amp; wipFiber.alternate.child</span></span><br><span class="line">  let prevSibling = null</span><br><span class="line"></span><br><span class="line">  // 1. 遍历当前fiber的children</span><br><span class="line">  // 2. 给children里的每个child指定3个指针，分别指向其 父、子、兄弟三个节点</span><br><span class="line"><span class="deletion">-  while (index &lt; elements.length) &#123;</span></span><br><span class="line"><span class="addition">+  while (index &lt; elements.length || oldFiber != null) &#123;</span></span><br><span class="line">    const element = elements[index]</span><br><span class="line"></span><br><span class="line"><span class="addition">+    let newFiber = null</span></span><br><span class="line"><span class="deletion">-    const newFiber = &#123;</span></span><br><span class="line"><span class="deletion">-      type: element.type,</span></span><br><span class="line"><span class="deletion">-      props: element.props,</span></span><br><span class="line"><span class="deletion">-      parent: wipFiber,</span></span><br><span class="line"><span class="deletion">-      dom: null,</span></span><br><span class="line"><span class="deletion">-    &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="addition">+ // TODO diff部分将在这里实现</span></span><br><span class="line"></span><br><span class="line"><span class="addition">+    if (oldFiber) &#123;</span></span><br><span class="line"><span class="addition">+        oldFiber = oldFiber.sibling</span></span><br><span class="line"><span class="addition">+    &#125;</span></span><br><span class="line">    </span><br><span class="line">    if (index <span class="comment">=== 0) &#123;</span></span><br><span class="line">      wipFiber.child = newFiber</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">      prevSibling.sibling = newFiber</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    prevSibling = newFiber</span><br><span class="line">    index++</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>下面我们来完成 <code>reconcileChildren</code> 方法里的<em>TODO</em>部分，也就是 diff</p>
+<h2 id="diff"><a href="#diff" class="headerlink" title="diff"></a>diff</h2><p>这里的 diff 主要是更新 fiber 的属性，还没有到真实的操作 dom</p>
+<h3 id="对比的策略"><a href="#对比的策略" class="headerlink" title="对比的策略"></a>对比的策略</h3><ul>
+<li>新、老 fiber 的 type 相同：保留 dom，更新属性</li>
+<li>新、老 fiber 的 type 不同：创建新 fiber，删除旧 fiber</li>
+</ul>
+<p>下面写出大体框架</p>
+<figure class="highlight diff"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">while (index &lt; elements.length || oldFiber != null) &#123;</span><br><span class="line">    const element = elements[index]</span><br><span class="line"></span><br><span class="line">    let newFiber = null</span><br><span class="line">    </span><br><span class="line"><span class="addition">+   const sameType =</span></span><br><span class="line"><span class="addition">+   oldFiber &amp;&amp;</span></span><br><span class="line"><span class="addition">+   element &amp;&amp;</span></span><br><span class="line"><span class="addition">+   element.type == oldFiber.type</span></span><br><span class="line"></span><br><span class="line"><span class="addition">+   if (sameType) &#123;</span></span><br><span class="line">     // TODO update the node</span><br><span class="line"><span class="addition">+   &#125;</span></span><br><span class="line"><span class="addition">+   if (element &amp;&amp; !sameType) &#123;</span></span><br><span class="line">     // TODO add this node</span><br><span class="line"><span class="addition">+   &#125;</span></span><br><span class="line"><span class="addition">+   if (oldFiber &amp;&amp; !sameType) &#123;</span></span><br><span class="line">     // TODO delete the oldFiber&#x27;s node</span><br><span class="line"><span class="addition">+   &#125;</span></span><br><span class="line">    </span><br><span class="line">    if (oldFiber) &#123;</span><br><span class="line">      oldFiber = oldFiber.sibling</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    if (index <span class="comment">=== 0) &#123;</span></span><br><span class="line">      wipFiber.child = newFiber</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">      prevSibling.sibling = newFiber</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    prevSibling = newFiber</span><br><span class="line">    index++</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="对比旧-fiber，创建新-fiber"><a href="#对比旧-fiber，创建新-fiber" class="headerlink" title="对比旧 fiber，创建新 fiber"></a>对比旧 fiber，创建新 fiber</h3><p>下面我们来完成上面 3 个 <em>TODO</em> 部分：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> sameType =</span><br><span class="line">  oldFiber &amp;&amp;</span><br><span class="line">  element &amp;&amp;</span><br><span class="line">  element.<span class="property">type</span> == oldFiber.<span class="property">type</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (sameType) &#123;</span><br><span class="line">  newFiber = &#123;</span><br><span class="line">    <span class="attr">type</span>: oldFiber.<span class="property">type</span>,</span><br><span class="line">    <span class="attr">props</span>: element.<span class="property">props</span>,</span><br><span class="line">    <span class="attr">dom</span>: oldFiber.<span class="property">dom</span>,</span><br><span class="line">    <span class="attr">parent</span>: wipFiber,</span><br><span class="line">    <span class="attr">alternate</span>: oldFiber,</span><br><span class="line">    <span class="attr">effectTag</span>: <span class="string">&quot;UPDATE&quot;</span>,</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> (element &amp;&amp; !sameType) &#123;</span><br><span class="line">  newFiber = &#123;</span><br><span class="line">    <span class="attr">type</span>: element.<span class="property">type</span>,</span><br><span class="line">    <span class="attr">props</span>: element.<span class="property">props</span>,</span><br><span class="line">    <span class="attr">dom</span>: <span class="literal">null</span>,</span><br><span class="line">    <span class="attr">parent</span>: wipFiber,</span><br><span class="line">    <span class="attr">alternate</span>: <span class="literal">null</span>,</span><br><span class="line">    <span class="attr">effectTag</span>: <span class="string">&quot;PLACEMENT&quot;</span>,</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> (oldFiber &amp;&amp; !sameType) &#123;</span><br><span class="line">  oldFiber.<span class="property">effectTag</span> = <span class="string">&quot;DELETION&quot;</span></span><br><span class="line">  deletions.<span class="title function_">push</span>(oldFiber)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>给每个 fiber 新增了<code>effectTag</code>属性，后面统一处理的时候，就知道是<code>更新</code>、<code>删除</code>还是<code>插入</code></li>
+<li>新增了<code>deletions</code>数组，存放所有待删除的<code>fiber</code>，后面统一删除里面的<code>dom</code></li>
+</ul>
+<p>上面的代码已经完成了迭代所有旧 fiber，并将其更新为了新 fiber</p>
+<h3 id="处理-deletions-数组"><a href="#处理-deletions-数组" class="headerlink" title="处理 deletions 数组"></a>处理 deletions 数组</h3><p>清空<code>deletions</code>数组将在 <code>commit</code> 这个阶段进行处理，而我们会将包括删除在内的所有更新操作都放到<code>commitWork</code>方法里去做</p>
+<figure class="highlight diff"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">function render(element, container) &#123;</span><br><span class="line">  // 虽然后面会给这个对象添加更多属性，但这里是第一个 fiber</span><br><span class="line">  wipRoot = &#123;</span><br><span class="line">    dom: container,</span><br><span class="line">    props: &#123;</span><br><span class="line">      children: [element],</span><br><span class="line">    &#125;,</span><br><span class="line">    alternate: currentRoot,</span><br><span class="line">  &#125;</span><br><span class="line"><span class="addition">+ deletions = []</span></span><br><span class="line">  nextUnitOfWork = wipRoot</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">function commitRoot() &#123;</span><br><span class="line"><span class="addition">+  deletions.forEach(commitWork)</span></span><br><span class="line">  commitWork(wipRoot.child)</span><br><span class="line">  currentRoot = wipRoot</span><br><span class="line">  wipRoot = null</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">let nextUnitOfWork = null</span><br><span class="line">let currentRoot = null</span><br><span class="line">let wipRoot = null</span><br><span class="line"><span class="addition">+ let deletions = null</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="commitWork"><a href="#commitWork" class="headerlink" title="commitWork"></a>commitWork</h3><p>下面我们来完善 <code>commitWork</code> 方法，<code>commitWork</code>除了插入，还有删除和更新</p>
+<figure class="highlight diff"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">function commitWork(fiber) &#123;</span><br><span class="line">  if (!fiber) return</span><br><span class="line"></span><br><span class="line">  const domParent = fiber.parent.dom</span><br><span class="line"><span class="deletion">- domParent.appendChild(fiber.dom)</span></span><br><span class="line"><span class="addition">+ if ( fiber.effectTag === &quot;PLACEMENT&quot; &amp;&amp; fiber.dom != null) &#123;</span></span><br><span class="line"><span class="addition">+   // 插入新dom</span></span><br><span class="line"><span class="addition">+   domParent.appendChild(fiber.dom)</span></span><br><span class="line"><span class="addition">+ &#125; else if (fiber.effectTag === &quot;UPDATE&quot; &amp;&amp; fiber.dom != null) &#123;</span></span><br><span class="line"><span class="addition">+   // 更新dom属性</span></span><br><span class="line"><span class="addition">+   updateDom(</span></span><br><span class="line"><span class="addition">+     fiber.dom,</span></span><br><span class="line"><span class="addition">+     fiber.alternate.props,</span></span><br><span class="line"><span class="addition">+     fiber.props</span></span><br><span class="line"><span class="addition">+   )</span></span><br><span class="line"><span class="addition">+ &#125; else if (fiber.effectTag === &quot;DELETION&quot;) &#123;</span></span><br><span class="line"><span class="addition">+   // 删除dom</span></span><br><span class="line"><span class="addition">+   domParent.removeChild(fiber.dom)</span></span><br><span class="line"><span class="addition">+ &#125;</span></span><br><span class="line">  commitWork(fiber.child)</span><br><span class="line">  commitWork(fiber.sibling)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="addition">+ function updateDom(dom, prevProps, nextProps) &#123;</span></span><br><span class="line"><span class="addition">+   // TODO</span></span><br><span class="line"><span class="addition">+ &#125;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="updateDom"><a href="#updateDom" class="headerlink" title="updateDom"></a>updateDom</h3><p>上面新增了一个 <code>updateDom</code> 方法，<code>updateDom</code> 会将所有的 diff 真实反应到的 dom 上，现在我们来实现它：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 判断是否是 dom 事件</span></span><br><span class="line"><span class="keyword">const</span> <span class="title function_">isEvent</span> = key =&gt; key.<span class="title function_">startsWith</span>(<span class="string">&quot;on&quot;</span>)</span><br><span class="line"><span class="comment">// 不是 dom 事件，也不是 children 属性，才是要更新的属性</span></span><br><span class="line"><span class="keyword">const</span> <span class="title function_">isProperty</span> = key =&gt;</span><br><span class="line">  key !== <span class="string">&quot;children&quot;</span> &amp;&amp; !<span class="title function_">isEvent</span>(key)</span><br><span class="line"><span class="comment">// 判断是否是新属性</span></span><br><span class="line"><span class="keyword">const</span> <span class="title function_">isNew</span> = (<span class="params">prev, next</span>) =&gt; <span class="function"><span class="params">key</span> =&gt;</span></span><br><span class="line">  prev[key] !== next[key]</span><br><span class="line"><span class="comment">// 判断属性是否被删除</span></span><br><span class="line"><span class="keyword">const</span> <span class="title function_">isGone</span> = (<span class="params">prev, next</span>) =&gt; <span class="function"><span class="params">key</span> =&gt;</span> !(key <span class="keyword">in</span> next)</span><br><span class="line"><span class="keyword">function</span> <span class="title function_">updateDom</span>(<span class="params">dom, prevProps, nextProps</span>) &#123;</span><br><span class="line">  <span class="comment">// 删除旧的 dom 事件监听函数</span></span><br><span class="line">  <span class="title class_">Object</span>.<span class="title function_">keys</span>(prevProps)</span><br><span class="line">    .<span class="title function_">filter</span>(isEvent)</span><br><span class="line">    .<span class="title function_">filter</span>(</span><br><span class="line">      <span class="function"><span class="params">key</span> =&gt;</span></span><br><span class="line">        !(key <span class="keyword">in</span> nextProps) ||</span><br><span class="line">        <span class="title function_">isNew</span>(prevProps, nextProps)(key)</span><br><span class="line">    )</span><br><span class="line">    .<span class="title function_">forEach</span>(<span class="function"><span class="params">name</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="keyword">const</span> eventType = name</span><br><span class="line">        .<span class="title function_">toLowerCase</span>()</span><br><span class="line">        .<span class="title function_">substring</span>(<span class="number">2</span>)</span><br><span class="line">      dom.<span class="title function_">removeEventListener</span>(</span><br><span class="line">        eventType,</span><br><span class="line">        prevProps[name]</span><br><span class="line">      )</span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 删除旧的属性</span></span><br><span class="line">  <span class="title class_">Object</span>.<span class="title function_">keys</span>(prevProps)</span><br><span class="line">    .<span class="title function_">filter</span>(isProperty)</span><br><span class="line">    .<span class="title function_">filter</span>(<span class="title function_">isGone</span>(prevProps, nextProps))</span><br><span class="line">    .<span class="title function_">forEach</span>(<span class="function"><span class="params">name</span> =&gt;</span> &#123;</span><br><span class="line">      dom[name] = <span class="string">&quot;&quot;</span></span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 设置新的属性</span></span><br><span class="line">  <span class="title class_">Object</span>.<span class="title function_">keys</span>(nextProps)</span><br><span class="line">    .<span class="title function_">filter</span>(isProperty)</span><br><span class="line">    .<span class="title function_">filter</span>(<span class="title function_">isNew</span>(prevProps, nextProps))</span><br><span class="line">    .<span class="title function_">forEach</span>(<span class="function"><span class="params">name</span> =&gt;</span> &#123;</span><br><span class="line">      dom[name] = nextProps[name]</span><br><span class="line">    &#125;)</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 设置新的 dom 事件监听函数</span></span><br><span class="line">  <span class="title class_">Object</span>.<span class="title function_">keys</span>(nextProps)</span><br><span class="line">    .<span class="title function_">filter</span>(isEvent)</span><br><span class="line">    .<span class="title function_">filter</span>(<span class="title function_">isNew</span>(prevProps, nextProps))</span><br><span class="line">    .<span class="title function_">forEach</span>(<span class="function"><span class="params">name</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="keyword">const</span> eventType = name</span><br><span class="line">        .<span class="title function_">toLowerCase</span>()</span><br><span class="line">        .<span class="title function_">substring</span>(<span class="number">2</span>)</span><br><span class="line">      dom.<span class="title function_">addEventListener</span>(</span><br><span class="line">        eventType,</span><br><span class="line">        nextProps[name]</span><br><span class="line">      )</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>实现很简单粗暴：删除旧属性，创建新属性</p>
+<p>最后将 <code>createDom</code> 里的 dom 更新，也改为使用 <code>updateDom</code>：</p>
+<figure class="highlight diff"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">function createDom(fiber) &#123;</span><br><span class="line">  const dom =</span><br><span class="line">      fiber.type == &quot;TEXT_ELEMENT&quot;</span><br><span class="line">        ? document.createTextNode(&quot;&quot;)</span><br><span class="line">        : document.createElement(fiber.type)</span><br><span class="line"></span><br><span class="line"><span class="addition">+  updateDom(dom, &#123;&#125;, fiber.props);</span></span><br><span class="line"><span class="deletion">-  // children 被放到了 props 属性里，这里过滤掉 children</span></span><br><span class="line"><span class="deletion">-  const isProperty = key =&gt; key !== &quot;children&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="deletion">-  Object.keys(fiber.props)</span></span><br><span class="line"><span class="deletion">-    .filter(isProperty)</span></span><br><span class="line"><span class="deletion">-    // 设置 dom 元素的属性，这里是简化版意思一下，直接赋值</span></span><br><span class="line"><span class="deletion">-    .forEach(name =&gt; dom[name] = fiber.props[name])</span></span><br><span class="line">  </span><br><span class="line">  return dom</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<p>现在，我们的 diff 基本实现</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/chao31/Didact/blob/feature/chao31_diff/index.js">本章源码</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>有钱的捧个钱场，没钱的捧个人场😜</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="/images/wechatpay.JPG" alt="Chao Tang 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="/images/alipay.JPG" alt="Chao Tang 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/react/" rel="tag"># react</a>
+              <a href="/tags/%E4%BB%8E-0-%E5%88%B0-1-%E7%B3%BB%E5%88%97/" rel="tag"># 从 0 到 1 系列</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/02/06/react/%E4%BB%8E0%E5%88%B01%E5%AE%9E%E7%8E%B0React2/" rel="prev" title="从 0 到 1 实现 React（二）实现 fiber">
+                  <i class="fa fa-chevron-left"></i> 从 0 到 1 实现 React（二）实现 fiber
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/02/18/react/%E4%BB%8E0%E5%88%B01%E5%AE%9E%E7%8E%B0React4/" rel="next" title="从 0 到 1 实现 React（四）final">
+                  从 0 到 1 实现 React（四）final <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-cannabis"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">chaotang</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lozad@1.16.0/dist/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="https://cdn.jsdelivr.net/npm/hexo-generator-searchdb@1.4.0/dist/search.js" integrity="sha256-vXZMYLEqsROAXkEw93GGIvaB2ab+QW6w3+1ahD9nXXA=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+  
+
+
+
+
+
+</body>
+</html>
